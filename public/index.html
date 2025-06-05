@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동물 판별 AI 웹앱</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container"> <!-- 컨테이너 시작: 모든 주요 콘텐츠를 감쌉니다. -->
+
+        <h1>동물 사진 판별기</h1>
+
+        <!-- 파일 업로드 폼 -->
+        <form id="uploadForm">
+            <h2>파일 업로드로 판별하기</h2>
+            <input type="file" name="image" id="imageFile" accept="image/*" required>
+            <button type="submit">판별하기</button>
+        </form>
+        
+        <hr> <!-- 파일 업로드와 카메라 섹션 구분 -->
+
+        <div id="cameraSection"> <!-- 카메라 섹션 시작 -->
+            <h2>카메라로 직접 찍어서 판별하기</h2>
+            <button type="button" id="startCameraBtn">카메라 켜기</button>
+            <!-- HTML 코드에 cameraPreviewContainer div를 추가했던 것을 반영합니다. -->
+            <div id="cameraPreviewContainer" style="display:none; margin-top: 15px;">
+                <video id="cameraPreview" playsinline autoplay style="width: 100%; max-width: 400px; border: 1px solid #ddd; border-radius: 4px; background-color: #000;"></video>
+                <canvas id="captureCanvas" style="display:none;"></canvas>
+                <button type="button" id="captureBtn" style="margin-top: 10px;">사진 찍고 판별하기</button>
+                <button type="button" id="stopCameraBtn" style="margin-top: 10px; background-color: #e74c3c;">카메라 끄기</button> 
+            </div>
+        </div> <!-- 카메라 섹션 끝 -->
+
+        <div id="predictionResult" style="margin-top: 20px; font-weight: bold;">
+            <!-- 판별 결과가 여기에 표시됩니다 -->
+        </div>
+
+    </div> <!-- 여기가 .container 의 닫는 태그 -->
+
+    <script src="js/main.js"></script>
+</body>
+</html>
