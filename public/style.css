@@ -1,16 +1,33 @@
-/* 기본 스타일 (모바일 우선) */
+/* public/style.css */
+
+/* --- 전역 기본 스타일 --- */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif; /* 시스템 기본 폰트 사용 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
     margin: 0;
     padding: 15px; /* 전체적인 여백 */
     background-color: #f4f4f4; /* 약간의 배경색 */
     color: #333; /* 기본 글자색 */
     line-height: 1.6; /* 줄 간격 */
-    text-align: center; /* 전체적으로 텍스트 중앙 정렬 (선택 사항) */
+    text-align: center; /* 전체적으로 텍스트 중앙 정렬 */
+    box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
 }
 
+/* --- 컨테이너 스타일 --- */
+.container {
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto; /* 위아래 여백, 좌우 자동 (중앙 정렬) */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* --- 제목 스타일 --- */
 h1 {
     color: #2c3e50;
+    margin-top: 0;
     margin-bottom: 20px;
 }
 
@@ -20,34 +37,36 @@ h2 {
     margin-bottom: 15px;
 }
 
-/* hr 태그는 현재 주석처리 되어있으므로, 이 스타일은 나중에 사용됩니다. */
+/* --- 구분선 스타일 --- */
 hr {
     border: 0;
     height: 1px;
-    background-color: #ddd;
-    margin: 30px 0;
+    background-color: #ddd; /* 연한 회색 구분선 */
+    margin: 40px 0; /* 위아래로 충분한 간격 */
 }
 
-/* 폼 및 버튼 스타일 */
-/* cameraSection에 대한 스타일은 현재 HTML에서 주석처리되어 있으므로 나중에 적용됩니다. */
+/* --- 폼 및 섹션 공통 스타일 --- */
 form, #cameraSection {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    background-color: #fff; /* 컨테이너와 동일, 필요시 변경 */
+    padding: 20px; /* 내부 여백 */
+    border-radius: 8px; /* 모서리 둥글게 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+    margin-bottom: 20px; /* 아래 여백 */
 }
 
+/* --- 파일 업로드 input 스타일 --- */
 input[type="file"] {
     display: block; /* 블록 요소로 만들어 줄바꿈 */
     width: 100%;    /* 부모 요소의 전체 너비 사용 */
     padding: 10px;
-    margin-bottom: 15px;
+    margin: 0 auto 15px auto; /* 상하 마진, 좌우 자동 (중앙 정렬) */
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box; /* 패딩과 테두리가 너비에 포함되도록 */
+    max-width: 400px; /* 너무 넓어지지 않도록 제한 */
 }
 
+/* --- 모든 버튼 공통 스타일 --- */
 button {
     background-color: #3498db; /* 주된 버튼 색상 */
     color: white;
@@ -60,244 +79,141 @@ button {
     width: 100%; /* 버튼 너비를 100%로 설정하여 모바일에서 터치하기 쉽게 */
     max-width: 300px; /* 버튼이 너무 커지는 것을 방지 (데스크탑에서 유용) */
     margin-top: 5px; /* 위쪽 여백 추가 */
+    display: block; /* 블록 요소로 설정 */
+    margin-left: auto; /* 좌우 자동 마진으로 중앙 정렬 */
+    margin-right: auto;
 }
 
 button:hover {
     background-color: #2980b9; /* 마우스 오버 시 색상 변경 */
 }
 
-/* 비활성화된 버튼 스타일 (나중에 JS로 버튼을 비활성화할 때 유용) */
 button:disabled {
     background-color: #bdc3c7;
     cursor: not-allowed;
 }
 
-/* 비디오 미리보기 스타일 (나중에 카메라 기능 추가 시 사용) */
+/* --- 카메라 섹션 내 특정 버튼 스타일 --- */
+#startCameraBtn {
+    background-color: #28a745; /* 녹색 계열 */
+}
+#startCameraBtn:hover {
+    background-color: #218838;
+}
+
+#captureBtn {
+    background-color: #ffc107; /* 주황색 계열 */
+    color: #333; /* 글자색 변경 */
+}
+#captureBtn:hover {
+    background-color: #e0a800;
+}
+
+#stopCameraBtn {
+    background-color: #e74c3c; /* 빨간색 계열 */
+}
+#stopCameraBtn:hover {
+    background-color: #c0392b;
+}
+
+#switchCameraBtn { /* 새로 추가된 카메라 전환 버튼 스타일 */
+    background-color: #6c757d; /* 회색 계열 */
+    margin-bottom: 10px; /* 하단 여백 추가 (captureBtn과 간격) */
+}
+#switchCameraBtn:hover {
+    background-color: #5a6268;
+}
+
+/* --- 카메라 미리보기 컨테이너 및 비디오 스타일 --- */
+#cameraPreviewContainer {
+    display: none; /* 초기에는 JS에 의해 숨겨짐 */
+    margin-top: 15px;
+    /* 내부 요소를 중앙 정렬하기 위해 flexbox 사용 */
+    display: flex;
+    flex-direction: column; /* 자식 요소들을 수직으로 배치 */
+    align-items: center; /* 수평 중앙 정렬 (교차축) */
+    justify-content: center; /* 수직 중앙 정렬 (주축) */
+}
+
 #cameraPreview {
-    display: block; 
-    width: 100%;    
-    max-width: 400px; 
-    margin: 15px auto; 
+    display: block; /* JS로 보이게 할 때를 대비 */
+    width: 100%;
+    max-width: 400px; /* 너무 커지지 않도록 최대 너비 제한 */
+    margin: 15px auto 10px auto; /* 위쪽 마진, 아래쪽은 버튼과 간격 */
     border: 1px solid #ddd;
     border-radius: 4px;
     background-color: #000;
 }
 
-/* 판별 결과 영역 스타일 */
-#predictionResult {
+#captureCanvas { /* 캔버스는 화면에 보이지 않게 숨김 */
+    display: none;
+}
+
+/* --- 판별 결과 메시지 스타일 --- */
+.prediction-message {
     margin-top: 20px;
     padding: 15px;
-    background-color: #eafaf1; 
-    border: 1px solid #A9DFBF;
-    border-radius: 4px;
-    min-height: 50px; 
-    text-align: left; /* 결과 텍스트는 좌측 정렬이 더 보기 좋을 수 있습니다. */
-}
-
-/* 데스크탑과 같은 더 큰 화면을 위한 미디어 쿼리 */
-@media (min-width: 768px) {
-    body {
-        padding: 30px;
-    }
-
-    h1 {
-        font-size: 2.5em;
-    }
-
-    form, #cameraSection { /* cameraSection 포함 */
-        max-width: 600px; 
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    button {
-        width: auto; 
-        min-width: 150px;
-    }
-
-    /* input[type="file"] 데스크탑에서 특별히 변경할 필요가 없다면 그대로 둡니다. */
-}
-
-/* === 기존에 있던 스타일들은 그대로 둡니다 === */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-    margin: 0;
-    padding: 0; 
-    background-color: #f4f4f4;
-    color: #333;
-    line-height: 1.6;
-}
-
-.container {
-    width: 90%; 
-    max-width: 600px; 
-    margin: 20px auto; 
-    padding: 20px;
-    background-color: #fff; 
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center; 
-}
-
-h1 {
-    color: #2c3e50;
-    margin-top: 0; 
-    margin-bottom: 20px;
-}
-
-h2 {
-    color: #34495e;
-    margin-top: 30px;
-    margin-bottom: 15px;
-}
-
-form {
-    margin-bottom: 20px; 
-}
-
-input[type="file"] {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin: 0 auto 15px auto; 
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    max-width: 400px; 
-}
-
-button {
-    background-color: #3498db;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-    width: 100%;
-    max-width: 300px; 
-    margin-top: 5px;
-    display: block; 
-    margin-left: auto;
-    margin-right: auto;
-}
-
-button:hover {
-    background-color: #2980b9;
-}
-
-button:disabled {
-    background-color: #bdc3c7;
-    cursor: not-allowed;
-}
-
-/* === 여기서부터 카메라 기능 및 결과 메시지 관련 CSS 추가 === */
-
-hr { /* 파일 업로드 섹션과 카메라 섹션 구분선 스타일 */
-    border: 0;
-    height: 1px;
-    background-color: #ddd; /* 연한 회색 구분선 */
-    margin: 40px 0; /* 위아래로 충분한 간격을 줍니다. */
-}
-
-/* #cameraSection 자체에 특별한 스타일을 줄 필요는 없을 수 있습니다. 
-   .container의 스타일을 따르거나 필요시 여기에 추가합니다. */
-/*
-#cameraSection {
-    background-color: #f0f0f0; 
-    padding: 15px;
-    border-radius: 5px;
-}
-*/
-
-/*  #cameraPreviewContainer { /* 비디오 미리보기와 관련 버튼들을 묶는 컨테이너 */
-    /* JavaScript에서 display:none 이었다가 block으로 변경될 때 적용될 스타일 */
-    /* 특별한 스타일이 필요 없다면 비워둡니다. 버튼들은 아래에서 개별적으로 스타일링합니다. */
-
-
-#cameraPreviewContainer button { /* 카메라 관련 버튼들 (사진 찍기, 카메라 끄기) */
-    margin-top: 10px; /* 버튼들 사이의 상단 간격 */
-    /* 기존 button 스타일을 상속받지만, 필요하면 여기서 크기나 색상을 다르게 지정할 수 있습니다. */
-    /* 예: width: 80%; padding: 10px; */
-}
-
-#stopCameraBtn { /* '카메라 끄기' 버튼은 특별한 색상으로 구분 */
-    background-color: #e74c3c; /* 빨간색 계열 (경고/중단 의미) */
-}
-
-#stopCameraBtn:hover {
-    background-color: #c0392b; /* 마우스 오버 시 더 어두운 빨간색 */
-}
-
-/* 비디오 미리보기 요소 자체의 스타일은 HTML 인라인으로도 일부 적용했지만,
-   CSS 파일에서 관리하는 것이 더 좋습니다. HTML의 인라인 스타일을 여기로 옮겨도 됩니다. */
-#cameraPreview {
-    display: block; /* JavaScript에서 보이게 할 때를 대비 */
-    width: 100%;    
-    max-width: 400px; /* 너무 커지지 않도록 최대 너비 제한 */
-    margin: 15px auto; /* 위아래 마진, 좌우는 auto로 중앙 정렬 */
-    border: 1px solid #ddd; /* 테두리 */
-    border-radius: 4px; /* 모서리 둥글게 */
-    background-color: #000; /* 비디오 로딩 중이나 실패 시 검은색 배경 */
-}
-
-
-/* 판별 결과 메시지(#predictionResult) 스타일 개선 */
-#predictionResult {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ddd; /* 기본 테두리 */
-    border-radius: 4px;
-    min-height: 50px; /* 내용이 없어도 최소 높이 유지 */
-    text-align: left; /* 결과 텍스트는 왼쪽 정렬이 보기 좋습니다. */
-    word-break: break-all; /* 긴 단어가 영역을 벗어나지 않도록 줄바꿈 */
+    font-size: 1.3em;
     font-weight: bold;
+    text-align: center; /* 결과 텍스트는 중앙 정렬이 더 좋을 수 있음 */
+    min-height: 2em; /* 내용이 없어도 최소 높이 유지 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    word-break: keep-all; /* 단어가 잘리지 않도록 (한국어에 유리) */
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* 부드러운 스타일 변화 */
-    /* 기본 배경색과 글자색은 아래 클래스에 의해 덮어쓰여집니다. */
-    background-color: #f8f9fa; /* 기본 배경색 (연한 회색) */
-    color: #212529; /* 기본 글자색 (어두운 회색) */
 }
 
-#predictionResult.error { /* 오류 메시지 스타일 */
-    background-color: #f8d7da; /* 연한 빨강 배경 */
-    border-color: #f5c6cb; /* 더 진한 빨강 테두리 */
-    color: #721c24; /* 어두운 빨강 글자 */
+/* 메시지 유형별 스타일 */
+.prediction-message.info {
+    color: #007bff; /* 파란색 계열 */
+    background-color: #e0f2ff;
+    border: 1px solid #b3e0ff;
 }
 
-#predictionResult.success-animal { /* 동물 판별 성공 메시지 스타일 */
-    background-color: #d4edda; /* 연한 초록 배경 */
-    border-color: #c3e6cb; /* 더 진한 초록 테두리 */
-    color: #155724; /* 어두운 초록 글자 */
+.prediction-message.loading {
+    color: #555;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
 }
 
-#predictionResult.warning { /* 판별하기 어려운 경우 (경고) 스타일 */
-    background-color: #fff3cd; /* 연한 노랑 배경 */
-    border-color: #ffeeba; /* 더 진한 노랑 테두리 */
-    color: #856404; /* 어두운 노랑 글자 */
+.prediction-message.success-animal {
+    color: #28a745; /* 녹색 */
+    background-color: #e6ffed;
+    border: 1px solid #a8e6b9;
 }
 
-#predictionResult.loading { /* 로딩 중 메시지 스타일 */
-    background-color: #e2e3e5; /* 연한 회색 배경 */
-    border-color: #d6d8db; /* 더 진한 회색 테두리 */
-    color: #383d41; /* 어두운 회색 글자 */
+.prediction-message.warning {
+    color: #ffc107; /* 주황색 */
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
 }
 
+.prediction-message.error {
+    color: #dc3545; /* 빨간색 */
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
 
-/* === 미디어 쿼리는 기존 내용을 유지하거나 필요에 따라 수정 === */
+/* --- 미디어 쿼리 (데스크탑/태블릿용) --- */
 @media (min-width: 768px) {
-    /* body {
+    .container {
         padding: 30px;
-    } */ /* .container가 패딩/마진을 관리하므로 불필요할 수 있음 */
+    }
 
     h1 {
         font-size: 2.5em;
     }
 
-    /* form, #cameraSection 등은 .container 내부로 들어갔으므로 max-width 불필요 */
-
-    /* button {
-        width: auto; 
-        min-width: 150px;
-    } */ /* 버튼 스타일은 이미 모바일/데스크탑 모두 적절하게 설정됨 */
+    /* 버튼들을 가로로 나열하고 싶다면 (선택 사항) */
+    /* #cameraSection .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 10px; // 버튼 간 간격
+    }
+    #cameraSection button {
+        width: auto;
+        margin: 0; // flexbox 사용 시 auto 마진 제거
+    } */
 }
