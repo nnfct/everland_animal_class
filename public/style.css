@@ -25,16 +25,9 @@ body {
 }
 
 /* --- 제목 스타일 --- */
-h1 {
-    color: #2c3e50;
-    margin-top: 0;
+h1, h2 {
+    color: #333;
     margin-bottom: 20px;
-}
-
-h2 {
-    color: #34495e;
-    margin-top: 30px;
-    margin-bottom: 15px;
 }
 
 /* --- 구분선 스타일 --- */
@@ -68,7 +61,7 @@ input[type="file"] {
 
 /* --- 모든 버튼 공통 스타일 --- */
 button {
-    background-color: #3498db; /* 주된 버튼 색상 */
+    background-color: #007bff; /* 주된 버튼 색상 */
     color: white;
     padding: 12px 20px;
     border: none;
@@ -85,7 +78,7 @@ button {
 }
 
 button:hover {
-    background-color: #2980b9; /* 마우스 오버 시 색상 변경 */
+    background-color: #0056b3; /* 마우스 오버 시 색상 변경 */
 }
 
 button:disabled {
@@ -149,6 +142,17 @@ button:disabled {
     display: none;
 }
 
+/* --- 미리보기 이미지 스타일 (JS에서 동적으로 생성되는 <img>) --- */
+#uploadedImagePreview {
+    display: none; /* 초기에는 숨김 */
+    max-width: 100%;
+    max-height: 300px;
+    object-fit: contain; /* 비율 유지하며 컨테이너에 맞춤 */
+    margin-top: 20px; /* 위 여백 */
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
 /* --- 판별 결과 메시지 스타일 --- */
 .prediction-message {
     margin-top: 20px;
@@ -205,15 +209,91 @@ button:disabled {
     h1 {
         font-size: 2.5em;
     }
+}
 
-    /* 버튼들을 가로로 나열하고 싶다면 (선택 사항) */
-    /* #cameraSection .button-group {
-        display: flex;
-        justify-content: center;
-        gap: 10px; // 버튼 간 간격
-    }
-    #cameraSection button {
-        width: auto;
-        margin: 0; // flexbox 사용 시 auto 마진 제거
-    } */
+/* public/style.css 에 추가 */
+
+/* 기존 모든 버튼 스타일 아래 또는 별도 섹션에 추가 */
+.secondary-button { /* 다음 문제 등 보조 버튼 스타일 */
+    background-color: #6c757d; /* 회색 계열 */
+}
+.secondary-button:hover {
+    background-color: #5a6268;
+}
+/* public/style.css 파일 - #quizImage 스타일에 추가 */
+
+#quizImage {
+    display: block; /* <--- 이 줄 추가 */
+    margin-left: auto; /* <--- 이 줄 추가 */
+    margin-right: auto; /* <--- 이 줄 추가 */
+    /* ... 기존 스타일 유지 (max-width, max-height, border, border-radius, margin-bottom) ... */
+}
+
+/* public/style.css 에 추가 */
+
+#animalDetailedInfo ul {
+    list-style-type: none; /* 목록 앞의 점(불릿) 제거 */
+    padding-left: 0;       /* 왼쪽 기본 패딩 제거 (선택 사항, 필요에 따라 조절) */
+}
+
+#animalDetailedInfo ul li {
+    margin-bottom: 5px; /* 각 항목 간의 약간의 아래쪽 여백 (선택 사항) */
+}
+
+/* public/style.css 에 추가 */
+
+/* --- 카메라 전체 화면 모드 스타일 --- */
+#cameraPreviewContainer.fullscreen-mode {
+    position: fixed; /* 화면 전체를 덮도록 고정 */
+    top: 0;
+    left: 0;
+    width: 100vw; /* 뷰포트 너비 전체 */
+    height: 100vh; /* 뷰포트 높이 전체 */
+    background-color: black; /* 배경은 검은색 */
+    z-index: 1000; /* 다른 요소들 위에 표시 */
+    display: flex; /* 내부 비디오 중앙 정렬을 위해 */
+    justify-content: center;
+    align-items: center;
+    /* 기존 패딩이나 마진은 제거 */
+    padding: 0;
+    margin: 0;
+    border-radius: 0; /* 모서리 둥글림 제거 */
+    box-shadow: none; /* 그림자 제거 */
+}
+
+#cameraPreviewContainer.fullscreen-mode video#cameraPreview {
+    width: 100%; /* 컨테이너 너비에 맞춤 */
+    height: 100%; /* 컨테이너 높이에 맞춤 */
+    max-width: none; /* 최대 너비 제한 해제 */
+    max-height: none; /* 최대 높이 제한 해제 */
+    object-fit: contain; /* 비율 유지하며 꽉 채우거나, 'cover'로 완전히 덮기 */
+    border: none; /* 테두리 제거 */
+    border-radius: 0;
+}
+
+/* 전체 화면 모드일 때 다른 버튼들은 숨기거나, 종료 버튼만 보이도록 조정 가능 */
+#cameraPreviewContainer.fullscreen-mode #captureBtn,
+#cameraPreviewContainer.fullscreen-mode #switchCameraBtn {
+    /* display: none; */ /* 필요하다면 숨김 */
+    position: absolute; /* 화면 위에 버튼 배치 */
+    bottom: 20px;
+    z-index: 1001;
+    /* 스타일 조정 */
+}
+
+#cameraPreviewContainer.fullscreen-mode #captureBtn {
+    left: 20px;
+}
+#cameraPreviewContainer.fullscreen-mode #switchCameraBtn {
+    right: 20px;
+}
+
+/* 전체 화면 종료 버튼 (카메라 끄기 버튼 재활용 또는 새 버튼) */
+#cameraPreviewContainer.fullscreen-mode #stopCameraBtn {
+    position: absolute;
+    top: 20px;
+    right: 20px; /* 오른쪽 상단 */
+    z-index: 1001;
+    /* 스타일 조정 */
+    background-color: rgba(231, 76, 60, 0.8); /* 반투명 빨강 */
 }

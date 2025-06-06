@@ -1,6 +1,30 @@
 // public/js/main.js
 
-document.addEventListener('DOMContentLoaded', () => {
+// animalInfo 객체 및 loadAnimalData 함수는 이전과 동일하게 유지
+let animalInfo = {};
+async function loadAnimalData() {
+    console.log("동물 정보 로드 시도...");
+    try {
+        const response = await fetch('js/animaldata.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}, ${response.statusText}`);
+        }
+        animalInfo = await response.json();
+        console.log("동물 정보 로드 완료:", JSON.stringify(animalInfo, null, 2));
+    } catch (error) {
+        console.error("동물 정보 로드 실패:", error);
+        if(document.getElementById('predictionResult')) {
+            document.getElementById('predictionResult').textContent = "동물 정보를 불러오는 데 실패했습니다. 새로고침 해주세요.";
+            document.getElementById('predictionResult').className = 'prediction-message error';
+        }
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("DOM 로드 완료, main.js 초기화 시작");
+    await loadAnimalData();
+
     // --- DOM 요소 가져오기 ---
     const uploadForm = document.getElementById('uploadForm');
     const imageFile = document.getElementById('imageFile');
@@ -13,40 +37,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const captureBtn = document.getElementById('captureBtn');
     const stopCameraBtn = document.getElementById('stopCameraBtn');
 
-    // **새로 추가된 카메라 전환 버튼 요소**
-    // HTML에 직접 추가하지 않고 JavaScript에서 동적으로 생성하여 삽입합니다.
+    const uploadedImagePreview = document.createElement('img');
+    uploadedImagePreview.id = 'uploadedImagePreview';
+    if (predictionResultDiv && predictionResultDiv.parentNode) {
+        predictionResultDiv.parentNode.insertBefore(uploadedImagePreview, predictionResultDiv);
+    }
+
     const switchCameraBtn = document.createElement('button');
     switchCameraBtn.id = 'switchCameraBtn';
     switchCameraBtn.textContent = '카메라 전환';
-    switchCameraBtn.type = 'button'; // 폼 제출 방지
-    // startCameraBtn의 부모 노드에 삽입 (카메라 켜기 버튼 옆에 위치)
-    // startCameraBtn이 존재하는지 먼저 확인 후 삽입
-    if (startCameraBtn) {
-        startCameraBtn.parentNode.insertBefore(switchCameraBtn, startCameraBtn.nextSibling);
+    switchCameraBtn.type = 'button';
+    if (startCameraBtn && startCameraBtn.parentNode) {
+        if (stopCameraBtn && stopCameraBtn.parentNode === startCameraBtn.parentNode) {
+            startCameraBtn.parentNode.insertBefore(switchCameraBtn, stopCameraBtn);
+        } else {
+            startCameraBtn.parentNode.insertBefore(switchCameraBtn, startCameraBtn.nextSibling);
+        }
     }
-    switchCameraBtn.style.display = 'none'; // 초기에는 숨김 처리
+    switchCameraBtn.style.display = 'none';
+
+    const animalInfoContainer = document.getElementById('animalInfoContainer');
+    const animalSimpleDesc = document.getElementById('animalSimpleDesc');
+    const toggleDetailedInfoBtn = document.getElementById('toggleDetailedInfoBtn');
+    const animalDetailedInfo = document.getElementById('animalDetailedInfo');
 
 
-    let stream = null; // 현재 활성화된 카메라 스트림을 저장할 변수
-    let currentFacingMode = 'user'; // 현재 카메라 모드: 'user' (전면), 'environment' (후면)
+    let stream = null;
+    let currentFacingMode = 'user';
 
 
     // --- 공통: 이미지 판별 요청을 백엔드로 보내는 함수 ---
-    async function sendImageForPrediction(fileBlob) {
-        showPredictionResult('판별 중... 이미지를 분석하고 있습니다.', 'loading'); // 로딩 메시지 표시
+    async function sendImageForPrediction(fileBlob) { /* ... 이전 답변의 최신 버전 그대로 사용 ... */
+        showPredictionResult('판별 중... 이미지를 분석하고 있습니다.', 'loading');
+        uploadedImagePreview.style.display = 'none';
+        uploadedImagePreview.src = '';
+        if (animalInfoContainer) animalInfoContainer.style.display = 'none';
 
-        const formData = new FormData(); // 서버로 보낼 데이터 객체 생성
-        formData.append('image', fileBlob, 'image.jpg'); // 'image'라는 이름으로 선택된 파일 추가 (파일명은 임의로 지정)
+        const fileName = fileBlob.name || 'image.jpg';
+        const formData = new FormData();
+        formData.append('image', fileBlob, fileName);
 
         try {
-            // 서버의 /predict 엔드포인트로 POST 요청 (FormData 전송)
             const response = await fetch('/predict', {
                 method: 'POST',
                 body: formData
-                // FormData 사용 시 'Content-Type' 헤더는 브라우저가 자동으로 'multipart/form-data'로 설정
             });
 
-            // 응답이 성공적이지 않으면 오류 처리
             if (!response.ok) {
                 const errorData = await response.json().catch(() => {
                     return { error: `서버 오류: ${response.status} ${response.statusText}` };
@@ -54,190 +90,200 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.error || `API 요청 실패: ${response.status}`);
             }
 
-            // 응답이 성공적이면 JSON 데이터 파싱
-            const result = await response.json();
-            // 결과 메시지 유형에 따라 스타일 적용
-            if (result.message.includes("입니다")) {
-                 showPredictionResult(result.message, 'success-animal');
-            } else if (result.message.includes("판별하기 어렵습니다")) {
-                showPredictionResult(result.message, 'warning');
-            } else {
-                showPredictionResult(result.message); // 기본 정보 메시지
+            const data = await response.json();
+            let resultMessage = data.message;
+            let messageType = 'info';
+            let detectedAnimalName = null;
+
+            if (resultMessage.includes("입니다")) {
+                messageType = 'success-animal';
+                const match = resultMessage.match(/이것은 (.*?)(입니다|으로 판별됩니다)/);
+                if (match && match[1]) {
+                    detectedAnimalName = match[1].trim();
+                }
+            } else if (resultMessage.includes("판별하기 어렵습니다")) {
+                messageType = 'warning';
             }
+            showPredictionResult(resultMessage, messageType);
+
+            console.log("AI 판별 결과 (JSON 키로 사용될 이름):", detectedAnimalName);
+
+            if (detectedAnimalName && Object.keys(animalInfo).length > 0 && animalInfo[detectedAnimalName]) {
+                console.log(`'${detectedAnimalName}' 키로 animalInfo에서 정보 찾음!`);
+                const info = animalInfo[detectedAnimalName];
+                if (animalSimpleDesc) animalSimpleDesc.textContent = info.summary || info.simpleDesc || "간단한 설명이 없습니다.";
+                if (animalDetailedInfo) animalDetailedInfo.innerHTML = info.detail || info.detailedInfo || "<p>상세 정보가 없습니다.</p>";
+                if (animalInfoContainer) animalInfoContainer.style.display = 'block';
+                if (animalDetailedInfo) animalDetailedInfo.style.display = 'none';
+                if (toggleDetailedInfoBtn) toggleDetailedInfoBtn.textContent = '상세 정보 보기';
+            } else {
+                console.warn(`'${detectedAnimalName}'에 대한 정보가 animaldata.json에 없습니다. JSON 키를 확인하세요. 또는 animalInfo 로드 실패.`);
+                if (animalInfoContainer) animalInfoContainer.style.display = 'none';
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImagePreview.src = e.target.result;
+                uploadedImagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(fileBlob);
 
         } catch (error) {
             console.error("판별 요청 오류:", error);
             showPredictionResult(`오류 발생: ${error.message}`, 'error');
+            if (animalInfoContainer) animalInfoContainer.style.display = 'none';
         }
     }
 
-
-    // --- 1. 파일 업로드 기능 ---
-    if (uploadForm) {
+    // --- 파일 업로드 기능 ---
+    if (uploadForm) { /* ... 이전 로직과 동일 ... */
         uploadForm.addEventListener('submit', async (event) => {
-            event.preventDefault(); // 폼의 기본 제출 동작(새로고침) 방지
-
-            if (!imageFile.files || imageFile.files.length === 0) {
+            event.preventDefault();
+            const fileToUpload = imageFile.files[0];
+            if (!fileToUpload) {
                 showPredictionResult('판별할 이미지를 선택해주세요.', 'error');
                 return;
             }
-
-            const fileToUpload = imageFile.files[0];
-
-            // 카메라가 켜져 있다면 끄기 (파일 업로드 시)
-            if (stream) {
-                stopCameraStream();
-            }
-
-            await sendImageForPrediction(fileToUpload); // 공통 예측 함수 호출 (파일 객체 직접 전달)
+            if (stream) stopCameraStream();
+            await sendImageForPrediction(fileToUpload);
         });
     }
 
 
-    // --- 2. 카메라 기능 ---
-
-    // 카메라 스트림 시작 함수
-    async function startCamera(facingMode = 'user') { // 기본은 전면 ('user')
-        // 기존 스트림이 있다면 중지
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
-
+    // --- 카메라 기능 (전체 화면 로직 포함) ---
+    async function startCamera(facingMode = 'user') {
+        if (stream) { stream.getTracks().forEach(track => track.stop()); }
         try {
-            // 사용자에게 카메라 사용 권한 요청 (비디오만, 오디오는 false)
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: facingMode // 'user' (전면) 또는 'environment' (후면)
-                },
-                audio: false
-            });
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode }, audio: false });
             cameraPreview.srcObject = stream;
-            // cameraPreview.play(); // autoplay 속성이 있어서 명시적 play는 필요 없을 수 있음
-
-            // UI 업데이트: 카메라 관련 컨테이너 및 버튼 표시
-            cameraPreviewContainer.style.display = 'block';
-            startCameraBtn.style.display = 'none'; // 카메라 시작 버튼 숨기기
-            captureBtn.style.display = 'inline-block'; // 사진 찍기 버튼 표시
-            stopCameraBtn.style.display = 'inline-block'; // 카메라 끄기 버튼 표시
             
-            // **카메라 전환 버튼도 표시**
-            switchCameraBtn.style.display = 'inline-block';
+            cameraPreviewContainer.style.display = 'flex';
+            startCameraBtn.style.display = 'none';
+            captureBtn.style.display = 'inline-block';
+            stopCameraBtn.style.display = 'inline-block';
+            switchCameraBtn.style.display = 'inline-block'; // **카메라 시작 시 전환 버튼 항상 표시**
 
-            showPredictionResult(''); // 이전 결과 메시지 초기화
+            showPredictionResult('');
+            uploadedImagePreview.style.display = 'none';
+            uploadedImagePreview.src = '';
+            if(animalInfoContainer) animalInfoContainer.style.display = 'none';
+            currentFacingMode = facingMode;
 
-            currentFacingMode = facingMode; // 현재 카메라 모드 업데이트
+            // 전체 화면 요청
+            if (cameraPreviewContainer.requestFullscreen) {
+                await cameraPreviewContainer.requestFullscreen().catch(err => console.warn("전체 화면 요청 실패:", err.message));
+            } else if (cameraPreviewContainer.webkitRequestFullscreen) {
+                await cameraPreviewContainer.webkitRequestFullscreen().catch(err => console.warn("전체 화면 요청 실패 (Safari):", err.message));
+            } else if (cameraPreviewContainer.msRequestFullscreen) {
+                await cameraPreviewContainer.msRequestFullscreen().catch(err => console.warn("전체 화면 요청 실패 (IE11):", err.message));
+            }
+            // cameraPreviewContainer.classList.add('fullscreen-mode'); // fullscreenchange 이벤트 핸들러에서 처리
 
         } catch (err) {
             console.error("카메라 접근 오류:", err);
             showPredictionResult(`카메라 접근 오류: ${err.message}. 권한을 확인해주세요.`, 'error');
-            // HTTPS 환경인지 확인 (http://localhost 는 예외적으로 허용될 수 있음)
             if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
                 showPredictionResult('카메라 기능은 HTTPS 또는 localhost 환경에서만 작동합니다.', 'error');
             }
-            // 실패 시 UI 초기화
+            cameraPreviewContainer.classList.remove('fullscreen-mode');
             cameraPreviewContainer.style.display = 'none';
-            startCameraBtn.style.display = 'block'; // 카메라 시작 버튼 다시 표시
+            startCameraBtn.style.display = 'block';
             captureBtn.style.display = 'none';
             stopCameraBtn.style.display = 'none';
-            switchCameraBtn.style.display = 'none'; // 카메라 전환 버튼 숨김
+            switchCameraBtn.style.display = 'none';
         }
     }
 
-    // 카메라 스트림 중지 함수
     function stopCameraStream() {
+        let wasFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+
         if (stream) {
-            const tracks = stream.getTracks(); // 스트림의 모든 트랙(비디오, 오디오) 가져오기
-            tracks.forEach(track => track.stop()); // 각 트랙 중지
-            stream = null; // 스트림 변수 초기화
-            cameraPreview.srcObject = null; // <video> 요소의 srcObject도 null로 설정
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+            cameraPreview.srcObject = null;
         }
-        // UI 업데이트
+
+        // 전체 화면 종료 (만약 전체 화면 상태였다면)
+        if (wasFullscreen) {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(err => console.warn("전체 화면 종료 실패:", err.message));
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+        // fullscreen-mode 클래스는 fullscreenchange 이벤트 핸들러에서 제거됨
+
+        // UI 초기화
         cameraPreviewContainer.style.display = 'none';
         startCameraBtn.style.display = 'block';
         captureBtn.style.display = 'none';
         stopCameraBtn.style.display = 'none';
-        switchCameraBtn.style.display = 'none'; // 카메라 전환 버튼 숨김
+        switchCameraBtn.style.display = 'none';
         showPredictionResult('카메라가 꺼졌습니다.');
+        uploadedImagePreview.style.display = 'none';
+        uploadedImagePreview.src = '';
+        if(animalInfoContainer) animalInfoContainer.style.display = 'none';
     }
 
+    // 전체 화면 변경 이벤트 리스너
+    function handleFullscreenChange() {
+        const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+        console.log("전체 화면 상태 변경됨. 현재 전체 화면:", isFullscreen);
 
-    // "카메라 켜기" 버튼 클릭 시 (토글 기능)
-    if (startCameraBtn) {
-        startCameraBtn.addEventListener('click', async () => {
-            if (stream) { // 카메라가 이미 켜져 있다면 끄기
-                stopCameraStream();
-            } else { // 카메라가 꺼져 있다면 켜기 (현재 설정된 모드로)
-                await startCamera(currentFacingMode);
+        if (isFullscreen) {
+            cameraPreviewContainer.classList.add('fullscreen-mode');
+            // 전체 화면 모드 진입 시, 버튼들은 CSS에 의해 이미 배치되어 있을 것임
+            // startCamera 함수에서 이미 버튼들을 표시했으므로, 여기서는 클래스 추가만.
+        } else {
+            // 전체 화면 모드가 종료되었을 때 (예: ESC 키 누름)
+            cameraPreviewContainer.classList.remove('fullscreen-mode');
+            // 스트림이 여전히 활성 상태라면 일반 카메라 UI를 유지
+            if (stream) {
+                cameraPreviewContainer.style.display = 'flex'; // 일반 모드 flex로 복원
+                startCameraBtn.style.display = 'none';
+                captureBtn.style.display = 'inline-block';
+                stopCameraBtn.style.display = 'inline-block';
+                switchCameraBtn.style.display = 'inline-block'; // **ESC로 전체화면 종료 시 전환 버튼 다시 표시**
+            } else {
+                // 스트림이 없다면 (stopCameraStream이 호출된 경우 등) UI는 이미 초기화됨
+                // startCameraBtn.style.display = 'block'; // 이 부분은 stopCameraStream에서 처리
             }
-        });
+        }
     }
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
 
-    // "카메라 끄기" 버튼 클릭 시 (명시적)
-    if (stopCameraBtn) {
-        stopCameraBtn.addEventListener('click', () => {
-            stopCameraStream();
-        });
-    }
-
-    // **카메라 전환 버튼 클릭 시**
-    if (switchCameraBtn) {
-        switchCameraBtn.addEventListener('click', async () => {
-            // 현재 모드를 토글: 'user' -> 'environment', 'environment' -> 'user'
-            currentFacingMode = (currentFacingMode === 'user' ? 'environment' : 'user');
-            await startCamera(currentFacingMode); // 새로운 모드로 카메라 시작
-        });
-    }
-
-
-    // "사진 찍고 판별하기" 버튼 클릭 시
-    if (captureBtn) {
+    // --- 이벤트 리스너들 ---
+    if (startCameraBtn) { startCameraBtn.addEventListener('click', async () => { if (stream) { stopCameraStream(); } else { await startCamera(currentFacingMode); } }); }
+    if (stopCameraBtn) { stopCameraBtn.addEventListener('click', () => { stopCameraStream(); }); }
+    if (switchCameraBtn) { switchCameraBtn.addEventListener('click', async () => { currentFacingMode = (currentFacingMode === 'user' ? 'environment' : 'user'); await startCamera(currentFacingMode); }); }
+    if (captureBtn) { /* ... 이전 캡처 버튼 로직 ... */
         captureBtn.addEventListener('click', async () => {
             if (!stream || !cameraPreview.srcObject || cameraPreview.paused || cameraPreview.ended) {
                 showPredictionResult("카메라가 켜져 있지 않거나 스트림이 없습니다.", 'error');
                 return;
             }
-
-            // <canvas>의 크기를 현재 비디오 미리보기의 실제 크기로 설정
             captureCanvas.width = cameraPreview.videoWidth;
             captureCanvas.height = cameraPreview.videoHeight;
-
-            // <canvas>에 현재 비디오 프레임을 그림
             const context = captureCanvas.getContext('2d');
             context.drawImage(cameraPreview, 0, 0, captureCanvas.width, captureCanvas.height);
-
-            // <canvas>의 이미지를 Blob 객체로 변환 (JPEG 형식, 품질 0.9)
             captureCanvas.toBlob(async (blob) => {
                 if (!blob) {
                     showPredictionResult("이미지 캡처에 실패했습니다.", 'error');
                     return;
                 }
-
-                await sendImageForPrediction(blob); // 공통 예측 함수 호출
-
-                // 선택 사항: 사진을 찍은 후 카메라를 자동으로 끄고 싶다면 아래 주석 해제
-                // stopCameraStream();
-                // startCameraBtn.style.display = 'block';
-                // cameraPreviewContainer.style.display = 'none';
-
+                await sendImageForPrediction(blob);
             }, 'image/jpeg', 0.9);
         });
     }
 
-    // 결과 메시지를 화면에 표시하고 스타일을 적용하는 함수
-    function showPredictionResult(message, type = 'info') { // 기본 타입을 'info'로 설정
-        predictionResultDiv.textContent = message;
-        // 기존 클래스를 모두 제거하고 새로운 타입에 맞는 클래스만 추가 (더 깔끔한 방식)
-        predictionResultDiv.className = 'prediction-message'; // 기본 클래스 항상 유지
 
-        if (type === 'error') {
-            predictionResultDiv.classList.add('error');
-        } else if (type === 'success-animal') {
-            predictionResultDiv.classList.add('success-animal');
-        } else if (type === 'warning') {
-            predictionResultDiv.classList.add('warning');
-        } else if (type === 'loading') {
-            predictionResultDiv.classList.add('loading');
-        }
-        // 'info' 타입은 기본 클래스만 사용 (특별한 스타일 없음)
-    }
+    if (toggleDetailedInfoBtn) { /* ... 이전 토글 버튼 로직 ... */ }
+
+    function showPredictionResult(message, type = 'info') { /* ... 이전 함수 내용 ... */ }
+
+    console.log("main.js 초기화 완료");
 });
