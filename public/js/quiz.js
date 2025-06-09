@@ -1,192 +1,157 @@
-// public/js/quiz.js
+// public/js/quiz.js (최종 수정본)
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM이 로드되었습니다. quiz.js 시작!");
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("퀴즈 페이지 로드 완료");
 
+    // --- DOM 요소 가져오기 ---
     const quizImage = document.getElementById('quizImage');
     const optionsContainer = document.getElementById('optionsContainer');
     const nextQuizBtn = document.getElementById('nextQuizBtn');
     const quizResultDiv = document.getElementById('quizResult');
+    const quizSection = document.getElementById('quizSection'); // 점수 표시를 위해
 
-    const quizScoreDiv = document.createElement('div');
-    quizScoreDiv.id = 'quizScore';
-    quizScoreDiv.style.marginTop = '10px';
-    quizScoreDiv.style.fontSize = '1.1em';
-    quizScoreDiv.style.fontWeight = 'bold';
-    quizScoreDiv.style.color = '#3498db';
-    if(quizResultDiv && quizResultDiv.parentNode) {
-        quizResultDiv.parentNode.insertBefore(quizScoreDiv, quizResultDiv);
-    } else {
-        console.error("quizResultDiv 또는 그 부모를 찾을 수 없습니다.");
+    let animalData = {};
+    let animalKeys = [];
+    let answerChecked = false;
+    
+    // --- 퀴즈 상태 변수 ---
+    const TOTAL_QUESTIONS = 5;
+    let quizPool = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    // 점수판 생성 및 삽입
+    const scoreDisplay = document.createElement('div');
+    scoreDisplay.id = 'scoreDisplay';
+    scoreDisplay.style.fontSize = '1.2em';
+    scoreDisplay.style.fontWeight = 'bold';
+    scoreDisplay.style.margin = '1rem 0';
+    quizSection.insertBefore(scoreDisplay, nextQuizBtn);
+
+    // 1. 동물 데이터 로드
+    async function loadAnimalData() {
+        try {
+            const response = await fetch('js/animaldata.json');
+            if (!response.ok) throw new Error('퀴즈 데이터 로드 실패');
+            animalData = await response.json();
+            animalKeys = Object.keys(animalData).filter(key => animalData[key].image); // 이미지가 있는 동물만
+            if (animalKeys.length < 4) {
+                 quizResultDiv.textContent = "퀴즈를 만들기에 동물이 부족해요!";
+                 return;
+            }
+            startQuiz();
+        } catch (error) {
+            console.error(error);
+            quizResultDiv.textContent = "퀴즈 데이터를 불러오는 데 실패했습니다.";
+        }
     }
 
-
-    const restartQuizBtn = document.createElement('button');
-    restartQuizBtn.id = 'restartQuizBtn';
-    restartQuizBtn.textContent = '퀴즈 다시 시작';
-    restartQuizBtn.className = 'secondary-button';
-    restartQuizBtn.style.marginTop = '20px';
-    restartQuizBtn.style.display = 'none';
-    if (nextQuizBtn && nextQuizBtn.parentNode) {
-        nextQuizBtn.parentNode.insertBefore(restartQuizBtn, nextQuizBtn.nextSibling);
-    } else {
-        console.error("nextQuizBtn 또는 그 부모를 찾을 수 없습니다.");
-    }
-
-
-    const quizImages = [
-        { src: 'quiz_images/m1.jpg', answer: '미어캣', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/m2.jpg', answer: '미어캣', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/m3.png', answer: '미어캣', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/m4.jpg', answer: '미어캣', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/m5.jpg', answer: '미어캣', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/m6.png', answer: '미어캣', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/mo1.jpg', answer: '몽구스', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/mo2.jpg', answer: '몽구스', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/mo3.jpg', answer: '몽구스', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/mo4.jpg', answer: '몽구스', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/mo5.jpg', answer: '몽구스', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/t1.jpg', answer: '머선거북이', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/t2.jpg', answer: '머선거북이', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/t3.jpg', answer: '머선거북이', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/t4.jpg', answer: '머선거북이', options: ['미어캣', '머선거북이', '몽구스',] },
-        { src: 'quiz_images/t5.jpg', answer: '머선거북이', options: ['미어캣', '머선거북이', '몽구스',] },
-    ];
-
-    const TOTAL_QUIZ_QUESTIONS = 5;
-    let currentQuestionNumber = 0;
-    let correctAnswersCount = 0;
-    let quizQuestionPool = [];
-
-
+    // 2. 퀴즈 시작
     function startQuiz() {
-        console.log("퀴즈 시작 (startQuiz)");
-        currentQuestionNumber = 0;
-        correctAnswersCount = 0;
-        quizScoreDiv.textContent = '';
-        restartQuizBtn.style.display = 'none';
-
-        optionsContainer.style.display = 'block';
-        nextQuizBtn.style.display = 'inline-block';
-        nextQuizBtn.textContent = '다음 문제';
-        nextQuizBtn.classList.remove('secondary-button');
-        nextQuizBtn.classList.add('primary-button');
-        nextQuizBtn.disabled = true; // 처음에는 비활성화
-
-        quizQuestionPool = shuffleArray([...quizImages]).slice(0, TOTAL_QUIZ_QUESTIONS);
-        if (quizQuestionPool.length < TOTAL_QUIZ_QUESTIONS) {
-            console.warn("주의: 퀴즈 이미지 수가 총 문제 수보다 적습니다.");
-        }
-        console.log("선택된 문제 풀:", quizQuestionPool);
-        
-        loadNextQuestion();
+        currentQuestionIndex = 0;
+        score = 0;
+        // 전체 동물 목록에서 랜덤하게 5문제 추출
+        quizPool = shuffleArray([...animalKeys]).slice(0, TOTAL_QUESTIONS);
+        nextQuizBtn.textContent = "다음 문제";
+        nextQuizBtn.disabled = true;
+        displayQuestion();
     }
 
-    function loadNextQuestion() {
-        console.log(`다음 문제 로드 (loadNextQuestion), 현재 문제 번호 (증가 전): ${currentQuestionNumber}`);
-        if (currentQuestionNumber >= TOTAL_QUIZ_QUESTIONS) {
-            console.log("퀴즈 종료 조건 충족 (loadNextQuestion)");
-            endQuiz();
-            return;
-        }
-
-        currentQuestionNumber++;
-        console.log(`현재 문제 번호 (증가 후): ${currentQuestionNumber}`);
-
-        // 문제 풀에 문제가 있는지 확인
-        if (!quizQuestionPool || quizQuestionPool.length < currentQuestionNumber) {
-            console.error("퀴즈 문제 풀에 문제가 없습니다. (loadNextQuestion)");
-            endQuiz(); // 문제가 없으면 퀴즈 종료
-            return;
-        }
-
-        const quizData = quizQuestionPool[currentQuestionNumber - 1];
-        console.log("현재 문제 데이터:", quizData);
-
-        quizImage.style.display = 'none';
-        quizResultDiv.textContent = `문제 ${currentQuestionNumber}/${TOTAL_QUIZ_QUESTIONS}`;
-        quizResultDiv.style.color = '#333';
-        quizScoreDiv.textContent = `현재 점수: ${correctAnswersCount} / ${currentQuestionNumber - 1}`;
-        
+    // 3. 문제 표시
+    function displayQuestion() {
+        answerChecked = false;
         optionsContainer.innerHTML = '';
-        shuffleArray([...quizData.options]).forEach(optionText => { // 원본 options 배열을 변경하지 않기 위해 복사 후 셔플
-            const optionBtn = document.createElement('button');
-            optionBtn.textContent = optionText;
-            optionBtn.className = 'quiz-option-button';
-            optionBtn.addEventListener('click', () => handleOptionClick(optionText, quizData.answer));
-            optionsContainer.appendChild(optionBtn);
+        quizResultDiv.textContent = '';
+        scoreDisplay.textContent = `문제 ${currentQuestionIndex + 1} / ${TOTAL_QUESTIONS} | 점수: ${score}`;
+
+        const answerKey = quizPool[currentQuestionIndex];
+        const answerInfo = animalData[answerKey];
+
+        quizImage.src = answerInfo.image;
+        quizImage.alt = answerInfo.name_en || "퀴즈 이미지";
+        quizImage.style.display = 'block';
+
+        const wrongOptionKeys = [];
+        while (wrongOptionKeys.length < 3) {
+            const randomKey = animalKeys[Math.floor(Math.random() * animalKeys.length)];
+            if (randomKey !== answerKey && !wrongOptionKeys.includes(randomKey)) {
+                wrongOptionKeys.push(randomKey);
+            }
+        }
+
+        const optionKeys = shuffleArray([answerKey, ...wrongOptionKeys]);
+
+        optionKeys.forEach(key => {
+            const button = document.createElement('button');
+            // ✨ --- 핵심 수정: 올바른 클래스 이름 적용 --- ✨
+            button.className = 'button quiz-option'; 
+            button.textContent = key.split('(')[0];
+            button.onclick = () => checkAnswer(key, answerKey);
+            optionsContainer.appendChild(button);
         });
 
-        // '다음 문제' 버튼은 사용자가 답변을 선택할 때까지 비활성화 상태로 유지
         nextQuizBtn.disabled = true;
-        console.log("nextQuizBtn 비활성화됨 (loadNextQuestion)");
-
-
-        quizImage.src = quizData.src;
-        quizImage.alt = `퀴즈 이미지: ${quizData.answer}`; // alt 속성 추가
-        quizImage.onload = () => { // 이미지가 완전히 로드된 후 표시
-            quizImage.style.display = 'block';
-            console.log("퀴즈 이미지 로드 완료 및 표시됨");
-        };
-        quizImage.onerror = () => {
-            console.error(`이미지 로드 실패: ${quizData.src}`);
-            quizResultDiv.textContent = '이미지를 로드할 수 없습니다.';
-            quizResultDiv.style.color = 'red';
-        };
     }
 
-    function handleOptionClick(selectedAnswer, correctAnswer) {
-        console.log(`선택지 클릭됨: 선택한 답 - ${selectedAnswer}, 정답 - ${correctAnswer}`);
+    // 4. 정답 확인
+    function checkAnswer(selectedKey, answerKey) {
+        if (answerChecked) return;
+        answerChecked = true;
+        nextQuizBtn.disabled = false;
 
+        if (selectedKey === answerKey) {
+            score++;
+            quizResultDiv.textContent = "🎉 정답입니다! 🎉";
+            quizResultDiv.style.color = 'green';
+        } else {
+            quizResultDiv.textContent = `😢 아쉬워요! 정답은 ${answerKey.split('(')[0]} 입니다.`;
+            quizResultDiv.style.color = 'red';
+        }
+        
+        // 버튼 스타일 업데이트
         Array.from(optionsContainer.children).forEach(btn => {
             btn.disabled = true;
-            if (btn.textContent.toLowerCase() === correctAnswer.toLowerCase()) {
-                btn.style.backgroundColor = 'green';
-                btn.style.color = 'white';
-            } else if (btn.textContent.toLowerCase() === selectedAnswer.toLowerCase()) {
-                btn.style.backgroundColor = 'red';
-                btn.style.color = 'white';
+            if (btn.textContent === answerKey.split('(')[0]) {
+                btn.classList.add('correct');
+            } else if (btn.textContent === selectedKey.split('(')[0]) {
+                btn.classList.add('wrong');
             }
         });
+        
+        scoreDisplay.textContent = `문제 ${currentQuestionIndex + 1} / ${TOTAL_QUESTIONS} | 점수: ${score}`;
 
-        if (selectedAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
-            quizResultDiv.textContent = `정답! 이 동물은 ${correctAnswer}입니다.`;
-            quizResultDiv.style.color = 'green';
-            correctAnswersCount++;
-        } else {
-            quizResultDiv.textContent = `오답! 정답은 ${correctAnswer}입니다.`;
-            quizResultDiv.style.color = 'red';
-        }
-        quizScoreDiv.textContent = `현재 점수: ${correctAnswersCount} / ${currentQuestionNumber}`;
-
-        // '다음 문제' 버튼 활성화
-        nextQuizBtn.disabled = false;
-        console.log("nextQuizBtn 활성화됨 (handleOptionClick)");
-
-        if (currentQuestionNumber === TOTAL_QUIZ_QUESTIONS) {
-            nextQuizBtn.textContent = '퀴즈 종료';
-            nextQuizBtn.classList.remove('primary-button');
-            nextQuizBtn.classList.add('secondary-button');
-        } else {
-            nextQuizBtn.textContent = '다음 문제';
-            nextQuizBtn.classList.remove('secondary-button');
-            nextQuizBtn.classList.add('primary-button');
+        if (currentQuestionIndex === TOTAL_QUESTIONS - 1) {
+            nextQuizBtn.textContent = "결과 보기";
         }
     }
 
-    function endQuiz() {
-        console.log("퀴즈 종료 (endQuiz)");
+    // 다음 문제 버튼 클릭 핸들러
+    nextQuizBtn.addEventListener('click', () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < TOTAL_QUESTIONS) {
+            displayQuestion();
+        } else {
+            showFinalResult();
+        }
+    });
+
+    // 최종 결과 표시
+    function showFinalResult() {
         quizImage.style.display = 'none';
-        optionsContainer.style.display = 'none';
+        optionsContainer.innerHTML = '';
         nextQuizBtn.style.display = 'none';
+        scoreDisplay.style.display = 'none';
+        quizResultDiv.innerHTML = `퀴즈 종료!<br>최종 점수는 <strong>${score} / ${TOTAL_QUESTIONS}</strong> 입니다!`;
 
-        quizResultDiv.textContent = `퀴즈 종료! 최종 점수: ${correctAnswersCount} / ${TOTAL_QUIZ_QUESTIONS} 입니다.`;
-        quizResultDiv.style.color = '#2c3e50';
-        quizScoreDiv.textContent = '';
-
-        restartQuizBtn.style.display = 'block';
+        // 다시하기 버튼 추가
+        const restartBtn = document.createElement('button');
+        restartBtn.className = 'button quiz';
+        restartBtn.textContent = '퀴즈 다시하기';
+        restartBtn.onclick = () => location.reload(); // 페이지 새로고침으로 간단히 구현
+        quizResultDiv.parentNode.insertBefore(restartBtn, quizResultDiv.nextSibling);
     }
-
+    
+    // 배열 셔플 함수
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -195,29 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return array;
     }
 
-
-    // --- 페이지 로드 시 퀴즈 시작 ---
-    // nextQuizBtn 이벤트 리스너는 여기에 위치하는 것이 더 안전합니다.
-    if (nextQuizBtn) {
-        nextQuizBtn.addEventListener('click', () => {
-            console.log("'다음 문제' 버튼 클릭됨");
-            loadNextQuestion();
-        });
-    } else {
-        console.error("nextQuizBtn 요소를 찾을 수 없습니다.");
-    }
-
-    if (restartQuizBtn) {
-        restartQuizBtn.addEventListener('click', () => {
-            console.log("'퀴즈 다시 시작' 버튼 클릭됨");
-            optionsContainer.style.display = 'block';
-            nextQuizBtn.style.display = 'inline-block';
-            
-            startQuiz();
-        });
-    } else {
-        console.error("restartQuizBtn 요소를 찾을 수 없습니다.");
-    }
-
-    startQuiz(); // 퀴즈 시작
+    // 퀴즈 시작
+    loadAnimalData();
 });

@@ -1,3 +1,5 @@
+/* public/style.css (최종 수정본) */
+
 body {
   margin: 0;
   padding: 0;
@@ -16,7 +18,7 @@ body {
   pointer-events: none;
 }
 
-/* 버튼 그룹 */
+/* 버튼 그룹 (메인 페이지) */
 .button-group {
   display: flex;
   flex-direction: column;
@@ -25,19 +27,14 @@ body {
   margin: 0 auto 2rem;
 }
 
-/* 공통 버튼 스타일 */
-.button,
-.upload,
-.capture,
-.quiz,
-.secondary,
-.quiz-option {
+/* --- ✨ 모든 버튼의 공통 스타일 (가장 중요) --- */
+.button {
   display: inline-block;
   width: 90%;
   max-width: 320px;
   padding: 1rem 2rem;
   border: none;
-  border-radius: 9999px;
+  border-radius: 9999px; /* 둥근 알약 모양 */
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
@@ -47,123 +44,125 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* 버튼 hover 효과 */
-.button:hover,
-.upload:hover,
-.capture:hover,
-.quiz:hover,
-.secondary:hover,
-.quiz-option:hover {
+.button:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* 버튼 색상 개별 지정 */
+
+/* --- 각 버튼의 개별 색상 및 텍스트 스타일 지정 --- */
 .upload {
   background: #ffe066;
-  color: #c78f00;      /* 어두운 금색 (검은색 대신) */
-  text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.7); /* 살짝 밝은 그림자 */
+  color: #c78f00;
+  text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.7);
 }
-
 
 .capture {
   background: #5ec8f2;
-  color: #007a9b;      /* 어두운 파란색 */
+  color: #007a9b;
   text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.7);
 }
 
-
-.quiz {
+.quiz,
+#nextQuizBtn { /* '다음 문제' 버튼도 이 스타일 적용 */
   background: #b28cf2;
-  color: #543b7c;      /* 어두운 보라색 */
+  color: #543b7c;
   text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.7);
 }
-
 
 .stop {
   background: #ff6b6b;
   color: #fff;
 }
 
-.secondary {
+.secondary { /* '메인으로 돌아가기' 버튼도 이 스타일 적용 */
   background-color: #7d8ca3;
   color: #fff;
 }
 
-/* 퀴즈 옵션 버튼 스타일 */
-.quiz-option {
-  background:pink;
-  color: #333;
+
+/* --- 퀴즈 페이지 고유 스타일 --- */
+#optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  margin: 1.5rem auto;
 }
 
-/* 정답 / 오답 상태 */
+/* 퀴즈 옵션 버튼 */
+.quiz-option {
+  /* ✨ 공통 스타일을 상속받도록 .button 클래스와 함께 사용됨 */
+  /* 여기서는 색상만 덮어씀 */
+  background: #f8c8dc;
+  color: #a14e69;
+  text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.6);
+}
+
 .quiz-option.correct {
   background: #8ce99a !important;
-  color: #fff;
+  color: #fff !important;
+  text-shadow: none !important;
+  transform: scale(1.05);
 }
 
 .quiz-option.wrong {
-  background: #ff6b6b !important;
-  color: #fff;
+  background: #ff8787 !important;
+  color: #fff !important;
+  text-shadow: none !important;
+  opacity: 0.7;
 }
 
-/* 결과 박스 */
-.result-box {
-  background-color: #e6faff;
-  border: 1px solid #b2ecf5;
-  padding: 1rem;
-  border-radius: 12px;
-  margin: 1.5rem auto;
+.quiz-option:disabled {
+    cursor: not-allowed;
+}
+
+#quizResult {
+  margin-top: 1.5rem;
+  font-size: 1.3em;
   font-weight: bold;
-  font-size: 1.1rem;
+  min-height: 1.5em;
+}
+
+
+/* --- 나머지 기존 스타일 --- */
+.result-box, #cameraPreview, .icon-row, .icon, #quizImage, #switchCameraBtn {
+  /* 이 부분은 변경 없음 */
+}
+
+/* style.css 파일의 아무 곳에나 아래 코드를 추가 */
+
+/* --- 이미지 미리보기 스타일 --- */
+.image-preview-box {
+  margin: 1.5rem auto;
   max-width: 400px;
 }
 
-/* 카메라 프리뷰 */
-#cameraPreview {
-  width: 100%;
-  max-width: 400px;
-  margin: 1rem auto;
-  border-radius: 12px;
-  background: #000;
-}
-
-/* 하단 아이콘 */
-.icon-row {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 2rem;
-  font-size: 1.8rem;
-  padding: 0 1.5rem 2rem;
-}
-
-.icon {
-  padding: 0.5rem;
-}
-
-/* 퀴즈 이미지 정렬 */
-#quizImage {
-  display: block;
+#uploadedImagePreview {
   max-width: 100%;
-  max-height: 250px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  margin: 1rem auto;
+  height: auto;
+  border-radius: 16px; /* 모서리를 둥글게 */
+  border: 4px solid white; /* 흰색 테두리 추가 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 그림자 효과 */
 }
 
-/* style.css 파일의 버튼 관련 섹션에 추가 */
+/* public/style.css 파일 맨 아래에 추가 */
 
-/* 카메라 전환 버튼 스타일 */
-#switchCameraBtn {
-  background-color: #6c757d; /* 회색 계열 */
-  color: white;
-}
-#switchCameraBtn:hover {
-  background-color: #5a6268;
+/* 상세 정보 컨테이너 내부의 리스트 스타일 초기화 */
+#animalDetailedInfo ul {
+  list-style-type: none; /* 목록 앞의 점(불릿) 제거 */
+  padding-left: 0;       /* 왼쪽 기본 들여쓰기(패딩) 제거 */
+  text-align: left;      /* 텍스트를 왼쪽 정렬하여 깔끔하게 보이도록 */
 }
 
-/* 퀴즈 옵션 버튼 기본 스타일 (기존 .quiz-option에서 일부 수정) */
-.quiz-option {
-  background: #ffc0cb; /* 분홍색을 명확히 지정 */
-  color: #333;
+/* 각 목록 항목(li)에 대한 스타일 (선택 사항) */
+#animalDetailedInfo li {
+  margin-bottom: 8px; /* 각 항목 사이에 약간의 수직 간격(8px)을 주어 가독성 향상 */
+}
+
+/* 상세 정보 내의 제목(h3) 스타일 조정 */
+#animalDetailedInfo h3 {
+    text-align: center; /* 제목은 중앙 정렬 유지 */
+    margin-top: 20px;   /* 위쪽 정보와 간격 */
+    margin-bottom: 10px;
 }
