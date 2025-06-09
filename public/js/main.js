@@ -1,4 +1,4 @@
-// public/js/main.js
+// public/js/main.js (최종 수정본)
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("DOM 로드 완료, main.js 초기화 시작");
@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const startCameraBtn = document.getElementById('startCameraBtn');
     const goToQuizBtn = document.getElementById('goToQuizBtn');
     const uploadBtn = document.querySelector('.button.upload');
+    const mainButtonGroup = document.querySelector('.button-group'); // ✨ 메인 버튼 그룹을 변수로 관리
     const cameraPreviewContainer = document.getElementById('cameraPreviewContainer');
     const cameraPreview = document.getElementById('cameraPreview');
     const captureCanvas = document.getElementById('captureCanvas');
@@ -20,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const animalSimpleDesc = document.getElementById('animalSimpleDesc');
     const toggleDetailedInfoBtn = document.getElementById('toggleDetailedInfoBtn');
     const animalDetailedInfo = document.getElementById('animalDetailedInfo');
+    const backToMainFromPreviewBtn = document.getElementById('backToMainFromPreviewBtn'); // ✨ 새로 추가한 버튼
 
     const switchCameraBtn = document.createElement('button');
     switchCameraBtn.id = 'switchCameraBtn';
@@ -27,130 +29,164 @@ document.addEventListener('DOMContentLoaded', async () => {
     switchCameraBtn.className = 'button secondary';
     captureBtn.parentNode.insertBefore(switchCameraBtn, captureBtn);
 
-    // --- 상태 변수 ---
+    // --- 상태 변수 및 초기 함수들 (이전과 동일) ---
     let stream = null;
     let currentFacingMode = 'user';
     let hasMultipleCameras = false;
     let animalInfo = {};
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    
+    // main.js 파일에서 이 함수 전체를 교체하세요.
 
-    // --- 기능 함수들 ---
-
-    async function loadAnimalData() {
-        try {
-            const response = await fetch('js/animaldata.json');
-            if (!response.ok) throw new Error('동물 정보 로드 실패');
-            animalInfo = await response.json();
-            console.log("동물 정보 로드 완료");
-        } catch (error) {
-            console.error(error);
-            showPredictionResult("정보 로드에 실패했습니다. 새로고침 해주세요.");
+async function loadAnimalData() {
+    try {
+        // 서버의 public/animal-info.json 경로에서 데이터를 가져옵니다.
+        const response = await fetch('/animaldata.json'); 
+        if (!response.ok) {
+            throw new Error(`동물 정보 파일(animaldata.json)을 불러오는 데 실패했습니다: ${response.status}`);
         }
+        // 가져온 데이터를 json 형태로 변환하여 animalInfo 변수에 저장합니다.
+        animalInfo = await response.json();
+        console.log("동물 정보 로딩 완료:", animalInfo);
+    } catch (error) {
+        console.error("동물 정보 로딩 중 오류 발생:", error);
+        // 사용자에게 오류를 알리는 방법도 고려할 수 있습니다.
+        // 예: alert('동물 정보를 불러올 수 없습니다. 페이지를 새로고침 해주세요.');
     }
-    await loadAnimalData();
+}
+    
 
-    async function checkCameraCapabilities() {
-        if (!navigator.mediaDevices?.enumerateDevices) return;
-        try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            hasMultipleCameras = devices.filter(d => d.kind === 'videoinput').length > 1;
-        } catch (err) {
-            console.error("카메라 장치 확인 오류:", err);
-        }
-    }
+    async function checkCameraCapabilities() { /* ... 이전과 동일 ... */ }
     checkCameraCapabilities();
+
+    // ✨ --- UI 상태 관리 함수들 --- ✨
+
+    // UI를 초기 메인 화면으로 리셋하는 함수
+    function resetToMainMenu() {
+        // 모든 결과 및 카메라 UI 숨기기
+        imagePreviewBox.style.display = 'none';
+        predictionResultDiv.style.display = 'none';
+        animalInfoContainer.style.display = 'none';
+        cameraPreviewContainer.style.display = 'none';
+        backToMainFromPreviewBtn.style.display = 'none';
+        
+        // 메인 버튼 그룹 보이기
+        mainButtonGroup.style.display = 'flex';
+    }
+    
+    // UI를 판별/미리보기 상태로 변경하는 함수
+    function showPreviewState() {
+        // 메인 버튼 그룹과 카메라 UI 숨기기
+        mainButtonGroup.style.display = 'none';
+        cameraPreviewContainer.style.display = 'none';
+
+        // 미리보기 및 결과 영역 보이기 (내용은 다른 함수에서 채움)
+        imagePreviewBox.style.display = 'block';
+        predictionResultDiv.style.display = 'block';
+        backToMainFromPreviewBtn.style.display = 'block';
+    }
 
     function showPredictionResult(message) {
         predictionResultDiv.textContent = message;
-        predictionResultDiv.style.display = 'block';
     }
 
-    // main.js 파일의 sendImageForPrediction 함수만 아래 내용으로 교체
+    // --- 핵심 로직 함수들 ---
 
-    async function sendImageForPrediction(fileBlob) {
+    async function handleFile(file) {
+        if (!file) return;
+        showPreviewState(); // ✨ UI를 미리보기 상태로 변경
+        
+        const options = { maxSizeMB: 2, maxWidthOrHeight: 1920, useWebWorker: true };
+        try {
+            const compressedFile = await imageCompression(file, options);
+            displayPreviewAndPredict(compressedFile);
+        } catch (error) {
+            console.error('이미지 처리 오류, 원본 파일로 시도:', error);
+            displayPreviewAndPredict(file);
+        }
+    }
+
+    function displayPreviewAndPredict(fileObject) {
         const reader = new FileReader();
         reader.onload = (e) => {
             uploadedImagePreview.src = e.target.result;
-            imagePreviewBox.style.display = 'block';
         };
-        reader.readAsDataURL(fileBlob);
+        reader.readAsDataURL(fileObject);
         
-        showPredictionResult('판별 중... 잠시만 기다려주세요...');
-        animalInfoContainer.style.display = 'none';
-
-        const formData = new FormData();
-        formData.append('image', fileBlob, 'image.jpg');
-
-        try {
-            const response = await fetch('/predict', { method: 'POST', body: formData });
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: '서버 응답 오류' }));
-                throw new Error(errorData.error);
-            }
-            
-            const data = await response.json();
-            const predictions = data.predictions || [];
-
-            if (predictions.length === 0) {
-                 showPredictionResult('아무것도 찾지 못했어요. 다른 사진으로 시도해보세요.');
-                 return;
-            }
-
-            const bestPrediction = predictions.reduce((prev, current) => 
-                (prev.probability > current.probability) ? prev : current
-            );
-            
-            // ✨ --- 여기가 최종 수정된 부분입니다 --- ✨
-            
-            const tagNameFromAI = bestPrediction.tagName; // 예: "미어캣(Meerkat)"
-            const probability = (bestPrediction.probability * 100).toFixed(2);
-            
-            console.log(`[디버깅] AI 예측 태그(키): "${tagNameFromAI}", 확률: ${probability}%`);
-
-            // AI가 반환한 tagName이 우리 데이터의 키(key) 중에 직접 존재하는지 확인
-            const foundAnimalInfo = animalInfo[tagNameFromAI];
-            
-            if (foundAnimalInfo) {
-                 console.log(`[디버깅] ✅ 일치! 키: ${tagNameFromAI}`);
-            } else {
-                 console.error(`[디버깅] ❌ animalInfo 객체에 "${tagNameFromAI}" 키가 없습니다.`);
-            }
-
-
-            // 결과 표시 로직
-            if (foundAnimalInfo && parseFloat(probability) >= 70) {
-                const koreanName = tagNameFromAI.split('(')[0];
-                const message = `이 동물은 ${koreanName} 같아요! (정확도: ${probability}%)`;
-                showPredictionResult(message);
-
-                animalSimpleDesc.textContent = foundAnimalInfo.summary || "간단한 설명이 없습니다.";
-                animalDetailedInfo.innerHTML = foundAnimalInfo.detail || "<p>상세 정보가 없습니다.</p>";
-                animalInfoContainer.style.display = 'block';
-                animalDetailedInfo.style.display = 'none';
-                toggleDetailedInfoBtn.textContent = '상세 정보 보기';
-            } else {
-                // foundAnimalInfo가 있더라도 확률이 낮으면 여기로 옴
-                const closestAnimalName = tagNameFromAI.split('(')[0];
-                const message = `판별하기 어려워요. (가장 비슷한 동물: ${closestAnimalName}, ${probability}%)`;
-                showPredictionResult(message);
-                animalInfoContainer.style.display = 'none';
-            }
-        } catch (error) {
-            showPredictionResult(`오류가 발생했어요: ${error.message}`);
-        }
+        requestAnimationFrame(() => {
+            predictionResultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        
+        sendImageForPrediction(fileObject);
     }
     
-    // 카메라 시작 함수
+    
+    async function sendImageForPrediction(fileObject) {
+    // 1. "판별 중..." 메시지 표시
+    showPredictionResult('판별 중... 이미지를 분석하고 있습니다.');
+    animalInfoContainer.style.display = 'none'; // 이전 정보 숨기기
+
+    const formData = new FormData();
+    formData.append('image', fileObject);
+
+    try {
+        const response = await fetch('/predict', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`서버 오류: ${response.status} (${errorText})`);
+        }
+
+        const data = await response.json();
+
+        // 2. 서버 응답에 따라 결과 표시
+        showPredictionResult(data.message);
+
+        // 3. 성공적으로 동물을 판별한 경우, 추가 정보 표시
+        if (data.animal_name && animalInfo[data.animal_name]) {
+            const info = animalInfo[data.animal_name];
+            
+            // 간단 설명 채우기
+            animalSimpleDesc.textContent = info.simple_desc;
+
+            // 상세 설명 (ul, li) 동적으로 생성 및 채우기
+            animalDetailedInfo.innerHTML = ''; // 기존 내용 초기화
+            const detailList = document.createElement('ul');
+            info.detailed_desc.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.textContent = item;
+                detailList.appendChild(listItem);
+            });
+            animalDetailedInfo.appendChild(detailList);
+            
+            // 정보 컨테이너 보이기
+            animalInfoContainer.style.display = 'block';
+            animalDetailedInfo.style.display = 'none'; // 상세 정보는 일단 숨김
+            toggleDetailedInfoBtn.textContent = '상세 정보 보기';
+            
+        } else {
+            // 판별 실패 시 정보 컨테이너 숨기기
+            animalInfoContainer.style.display = 'none';
+        }
+
+    } catch (error) {
+        console.error('판별 요청 오류:', error);
+        showPredictionResult(`오류가 발생했습니다: ${error.message}`);
+        animalInfoContainer.style.display = 'none';
+    }
+} 
+
     async function startCamera(facingMode) {
         if (stream) stream.getTracks().forEach(track => track.stop());
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode } });
             cameraPreview.srcObject = stream;
             
-            cameraPreviewContainer.style.display = 'block';
-            startCameraBtn.style.display = 'none';
-            goToQuizBtn.style.display = 'none';
-            uploadBtn.style.display = 'none';
+            mainButtonGroup.style.display = 'none'; // 메인 버튼 숨기기
+            cameraPreviewContainer.style.display = 'block'; // 카메라 보이기
             currentFacingMode = facingMode;
 
             if (isTouchDevice) {
@@ -160,30 +196,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (err) {
             alert('카메라를 시작할 수 없습니다: ' + err.message);
-            stopCameraStream();
+            resetToMainMenu(); // 실패 시 메인으로 복구
         }
     }
 
-    // 카메라 정지 함수
     function stopCameraStream() {
         if (stream) stream.getTracks().forEach(track => track.stop());
         stream = null;
-        cameraPreviewContainer.style.display = 'none';
-        startCameraBtn.style.display = 'inline-block';
-        goToQuizBtn.style.display = 'inline-block';
-        uploadBtn.style.display = 'inline-block';
+        resetToMainMenu(); // '카메라 끄기'는 항상 메인으로 복귀
     }
 
     // --- 이벤트 리스너 ---
 
     imageFile.addEventListener('change', (event) => {
         const file = event.target.files[0];
-        if (file) {
-            requestAnimationFrame(() => {
-                predictionResultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
-            sendImageForPrediction(file);
-        }
+        handleFile(file);
     });
 
     startCameraBtn.addEventListener('click', () => {
@@ -203,18 +230,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         const context = captureCanvas.getContext('2d');
         captureCanvas.width = cameraPreview.videoWidth;
         captureCanvas.height = cameraPreview.videoHeight;
-        context.drawImage(cameraPreview, 0, 0);
-        stopCameraStream();
         
-        requestAnimationFrame(() => {
-            predictionResultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-        captureCanvas.toBlob(sendImageForPrediction, 'image/jpeg');
+        if (currentFacingMode === 'user') {
+            context.save();
+            context.scale(-1, 1);
+            context.drawImage(cameraPreview, -captureCanvas.width, 0, captureCanvas.width, captureCanvas.height);
+            context.restore();
+        } else {
+            context.drawImage(cameraPreview, 0, 0, captureCanvas.width, captureCanvas.height);
+        }
+        
+        // ✨ 스트림만 정지하고 UI는 숨기기만 함
+        if (stream) stream.getTracks().forEach(track => track.stop());
+        stream = null;
+
+        captureCanvas.toBlob((blob) => {
+            if (!blob) return;
+            const capturedFile = new File([blob], "capture.jpg", { type: "image/jpeg" });
+            handleFile(capturedFile);
+        }, 'image/jpeg', 0.9);
     });
 
     toggleDetailedInfoBtn.addEventListener('click', () => {
-        const isHidden = animalDetailedInfo.style.display === 'none';
-        animalDetailedInfo.style.display = isHidden ? 'block' : 'none';
-        toggleDetailedInfoBtn.textContent = isHidden ? '상세 정보 숨기기' : '상세 정보 보기';
-    });
+    const isHidden = animalDetailedInfo.style.display === 'none';
+
+    if (isHidden) {
+        // 상세 정보가 숨겨져 있으면 보여주기
+        animalDetailedInfo.style.display = 'block';
+        toggleDetailedInfoBtn.textContent = '상세 정보 닫기';
+    } else {
+        // 상세 정보가 보이고 있으면 숨기기
+        animalDetailedInfo.style.display = 'none';
+        toggleDetailedInfoBtn.textContent = '상세 정보 보기';
+    }
+});
+    
+
+    // ✨ 새로 추가한 '메인으로 돌아가기' 버튼 이벤트 리스너
+    backToMainFromPreviewBtn.addEventListener('click', resetToMainMenu);
 });

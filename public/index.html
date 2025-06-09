@@ -33,6 +33,9 @@
      <div id="imagePreviewBox" class="image-preview-box" style="display: none;">
       <img id="uploadedImagePreview" src="#" alt="업로드된 이미지" />
     </div>
+    
+    <!-- ✨ 수정: 이미지 업로드 후 미리보기 영역 추가 -->
+     <button type="button" id="backToMainFromPreviewBtn" class="button secondary" style="display: none;">메인으로 돌아가기</button>
 
     <!-- 결과 표시 -->
     <div id="predictionResult" class="result-box" style="display: none;"></div>
@@ -52,6 +55,8 @@
     </div>
 
   </div>
+  <!-- browser-image-compression 라이브러리 로드 스크립트 -->
+  <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 
   <script src="js/main.js"></script>
 </body>
