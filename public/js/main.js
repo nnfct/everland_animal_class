@@ -2,6 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("DOM 로드 완료, main.js 초기화 시작");
+      
 
     // --- DOM 요소 가져오기 ---
     const imageFile = document.getElementById('imageFile');
@@ -33,27 +34,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     let stream = null;
     let currentFacingMode = 'user';
     let hasMultipleCameras = false;
-    let animalInfo = {};
+    
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     
     // main.js 파일에서 이 함수 전체를 교체하세요.
 
-async function loadAnimalData() {
-    try {
-        // 서버의 public/animal-info.json 경로에서 데이터를 가져옵니다.
-        const response = await fetch('/animaldata.json'); 
-        if (!response.ok) {
-            throw new Error(`동물 정보 파일(animaldata.json)을 불러오는 데 실패했습니다: ${response.status}`);
-        }
-        // 가져온 데이터를 json 형태로 변환하여 animalInfo 변수에 저장합니다.
-        animalInfo = await response.json();
-        console.log("동물 정보 로딩 완료:", animalInfo);
-    } catch (error) {
-        console.error("동물 정보 로딩 중 오류 발생:", error);
-        // 사용자에게 오류를 알리는 방법도 고려할 수 있습니다.
-        // 예: alert('동물 정보를 불러올 수 없습니다. 페이지를 새로고침 해주세요.');
-    }
-}
+
     
 
     async function checkCameraCapabilities() { /* ... 이전과 동일 ... */ }
@@ -146,21 +132,14 @@ async function loadAnimalData() {
         showPredictionResult(data.message);
 
         // 3. 성공적으로 동물을 판별한 경우, 추가 정보 표시
-        if (data.animal_name && animalInfo[data.animal_name]) {
-            const info = animalInfo[data.animal_name];
+        if (data.animal_name && data.animal_info) {
+            const info = data.animal_info 
             
             // 간단 설명 채우기
-            animalSimpleDesc.textContent = info.simple_desc;
+            animalSimpleDesc.textContent = info.summary;
 
             // 상세 설명 (ul, li) 동적으로 생성 및 채우기
-            animalDetailedInfo.innerHTML = ''; // 기존 내용 초기화
-            const detailList = document.createElement('ul');
-            info.detailed_desc.forEach(item => {
-                const listItem = document.createElement('li');
-                listItem.textContent = item;
-                detailList.appendChild(listItem);
-            });
-            animalDetailedInfo.appendChild(detailList);
+            animalDetailedInfo.innerHTML = info.detail;
             
             // 정보 컨테이너 보이기
             animalInfoContainer.style.display = 'block';
