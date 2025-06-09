@@ -22,7 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const animalSimpleDesc = document.getElementById('animalSimpleDesc');
     const toggleDetailedInfoBtn = document.getElementById('toggleDetailedInfoBtn');
     const animalDetailedInfo = document.getElementById('animalDetailedInfo');
-    const backToMainFromPreviewBtn = document.getElementById('backToMainFromPreviewBtn'); // ✨ 새로 추가한 버튼
+    const backToMainFromPreviewBtn = document.getElementById('backToMainFromPreviewBtn'); 
+    const uploadIcon = document.getElementById('uploadIcon');
+    const cameraIcon = document.getElementById('cameraIcon');
+    const quizIcon = document.getElementById('quizIcon');
 
     const switchCameraBtn = document.createElement('button');
     switchCameraBtn.id = 'switchCameraBtn';
@@ -170,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (isTouchDevice) {
                 requestAnimationFrame(() => {
-                    cameraPreviewContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    cameraPreviewContainer.scrollIntoView({block: 'start' });
                 });
             }
         } catch (err) {
@@ -247,4 +250,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ✨ 새로 추가한 '메인으로 돌아가기' 버튼 이벤트 리스너
     backToMainFromPreviewBtn.addEventListener('click', resetToMainMenu);
-});
+
+
+        // '이미지 업로드' 아이콘 클릭 시
+    uploadIcon.addEventListener('click', () => {
+        // 숨겨진 파일 입력창을 클릭하여 파일 선택창을 엽니다.
+        imageFile.click();
+    });
+
+    // '촬영하기' 아이콘 클릭 시
+    cameraIcon.addEventListener('click', () => {
+        // '촬영하기' 버튼을 클릭한 것과 동일한 동작을 수행합니다.
+        startCameraBtn.click();
+    });
+
+    // '퀴즈 풀러가기' 아이콘 클릭 시
+    quizIcon.addEventListener('click', () => {
+        // 퀴즈 페이지로 이동합니다.
+        location.href = 'quiz.html';
+    });
+
+}); // DOMContentLoaded 이벤트 리스너 닫는 부분
