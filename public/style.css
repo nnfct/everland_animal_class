@@ -297,3 +297,13 @@ button:disabled {
     /* 스타일 조정 */
     background-color: rgba(231, 76, 60, 0.8); /* 반투명 빨강 */
 }
+
+/* public/style.css 에 추가 */
+
+/* --- 카메라 섹션 내 특정 버튼 스타일 --- */
+#fullscreenBtn { /* 새로 추가된 전체 화면 버튼 스타일 */
+    background-color: #17a2b8; /* 청록색 계열 */
+}
+#fullscreenBtn:hover {
+    background-color: #138496;
+}

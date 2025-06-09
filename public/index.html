@@ -8,10 +8,8 @@
 </head>
 <body>
     <div class="container">
-
         <h1>동물 사진 판별기</h1>
 
-        <!-- 파일 업로드 폼 -->
         <form id="uploadForm">
             <h2>파일 업로드로 판별하기</h2>
             <input type="file" name="image" id="imageFile" accept="image/*" required>
@@ -23,31 +21,25 @@
         <div id="cameraSection">
             <h2>카메라로 직접 찍어서 판별하기</h2>
             <button type="button" id="startCameraBtn">카메라 켜기</button>
-            <!-- switchCameraBtn은 JS에서 동적으로 삽입됩니다. -->
             
             <div id="cameraPreviewContainer" style="display:none; margin-top: 15px;">
                 <video id="cameraPreview" playsinline autoplay style="width: 100%; max-width: 400px; border: 1px solid #ddd; border-radius: 4px; background-color: #000;"></video>
                 <canvas id="captureCanvas" style="display:none;"></canvas>
+                
+                <button type="button" id="fullscreenBtn" style="margin-top: 10px;">전체 화면</button>
                 <button type="button" id="captureBtn" style="margin-top: 10px;">사진 찍고 판별하기</button>
                 <button type="button" id="stopCameraBtn" style="margin-top: 10px; background-color: #e74c3c;">카메라 끄기</button>
+                <!-- switchCameraBtn은 JS에서 동적으로 삽입됩니다. -->
             </div>
         </div>
         
-        <!-- 미리보기 이미지 태그 (JS에서 동적 생성, predictionResultDiv 위에 삽입됨) -->
+        <div id="predictionResult" style="margin-top: 20px; font-weight: bold;"></div>
 
-        <div id="predictionResult" style="margin-top: 20px; font-weight: bold;">
-            <!-- 판별 결과가 여기에 표시됩니다 -->
-        </div>
-
-        <!-- **여기서부터 동물 정보 표시 영역 (새로 추가)** -->
         <div id="animalInfoContainer" style="display: none;"> 
             <p id="animalSimpleDesc"></p>
             <button type="button" id="toggleDetailedInfoBtn" class="secondary-button">상세 정보 보기</button>
-            <div id="animalDetailedInfo" style="display: none;">
-                <!-- 상세 정보가 여기에 표시됩니다 -->
-            </div>
+            <div id="animalDetailedInfo" style="display: none;"></div>
         </div>
-        <!-- **여기까지 동물 정보 표시 영역** -->
 
         <hr>
 
