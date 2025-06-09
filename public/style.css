@@ -1,309 +1,169 @@
-/* public/style.css */
-
-/* --- 전역 기본 스타일 --- */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-    margin: 0;
-    padding: 15px; /* 전체적인 여백 */
-    background-color: #f4f4f4; /* 약간의 배경색 */
-    color: #333; /* 기본 글자색 */
-    line-height: 1.6; /* 줄 간격 */
-    text-align: center; /* 전체적으로 텍스트 중앙 정렬 */
-    box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+  margin: 0;
+  padding: 0;
+  font-family: 'Pretendard', 'Segoe UI', sans-serif;
+  background-color: #6fc82f;
+  text-align: center;
+  color: #333;
 }
 
-/* --- 컨테이너 스타일 --- */
-.container {
-    width: 90%;
-    max-width: 600px;
-    margin: 20px auto; /* 위아래 여백, 좌우 자동 (중앙 정렬) */
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
+/* 메인 배너 이미지 */
+#mainImagePreview {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 2rem;
+  pointer-events: none;
 }
 
-/* --- 제목 스타일 --- */
-h1, h2 {
-    color: #333;
-    margin-bottom: 20px;
+/* 버튼 그룹 */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  margin: 0 auto 2rem;
 }
 
-/* --- 구분선 스타일 --- */
-hr {
-    border: 0;
-    height: 1px;
-    background-color: #ddd; /* 연한 회색 구분선 */
-    margin: 40px 0; /* 위아래로 충분한 간격 */
+/* 공통 버튼 스타일 */
+.button,
+.upload,
+.capture,
+.quiz,
+.secondary,
+.quiz-option {
+  display: inline-block;
+  width: 90%;
+  max-width: 320px;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 9999px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  margin: 0.5rem auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* --- 폼 및 섹션 공통 스타일 --- */
-form, #cameraSection {
-    background-color: #fff; /* 컨테이너와 동일, 필요시 변경 */
-    padding: 20px; /* 내부 여백 */
-    border-radius: 8px; /* 모서리 둥글게 */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
-    margin-bottom: 20px; /* 아래 여백 */
+/* 버튼 hover 효과 */
+.button:hover,
+.upload:hover,
+.capture:hover,
+.quiz:hover,
+.secondary:hover,
+.quiz-option:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* --- 파일 업로드 input 스타일 --- */
-input[type="file"] {
-    display: block; /* 블록 요소로 만들어 줄바꿈 */
-    width: 100%;    /* 부모 요소의 전체 너비 사용 */
-    padding: 10px;
-    margin: 0 auto 15px auto; /* 상하 마진, 좌우 자동 (중앙 정렬) */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* 패딩과 테두리가 너비에 포함되도록 */
-    max-width: 400px; /* 너무 넓어지지 않도록 제한 */
+/* 버튼 색상 개별 지정 */
+.upload {
+  background: #ffe066;
+  color: #c78f00;      /* 어두운 금색 (검은색 대신) */
+  text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.7); /* 살짝 밝은 그림자 */
 }
 
-/* --- 모든 버튼 공통 스타일 --- */
-button {
-    background-color: #007bff; /* 주된 버튼 색상 */
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease; /* 부드러운 색상 변화 효과 */
-    width: 100%; /* 버튼 너비를 100%로 설정하여 모바일에서 터치하기 쉽게 */
-    max-width: 300px; /* 버튼이 너무 커지는 것을 방지 (데스크탑에서 유용) */
-    margin-top: 5px; /* 위쪽 여백 추가 */
-    display: block; /* 블록 요소로 설정 */
-    margin-left: auto; /* 좌우 자동 마진으로 중앙 정렬 */
-    margin-right: auto;
+
+.capture {
+  background: #5ec8f2;
+  color: #007a9b;      /* 어두운 파란색 */
+  text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.7);
 }
 
-button:hover {
-    background-color: #0056b3; /* 마우스 오버 시 색상 변경 */
+
+.quiz {
+  background: #b28cf2;
+  color: #543b7c;      /* 어두운 보라색 */
+  text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.7);
 }
 
-button:disabled {
-    background-color: #bdc3c7;
-    cursor: not-allowed;
+
+.stop {
+  background: #ff6b6b;
+  color: #fff;
 }
 
-/* --- 카메라 섹션 내 특정 버튼 스타일 --- */
-#startCameraBtn {
-    background-color: #28a745; /* 녹색 계열 */
-}
-#startCameraBtn:hover {
-    background-color: #218838;
+.secondary {
+  background-color: #7d8ca3;
+  color: #fff;
 }
 
-#captureBtn {
-    background-color: #ffc107; /* 주황색 계열 */
-    color: #333; /* 글자색 변경 */
-}
-#captureBtn:hover {
-    background-color: #e0a800;
+/* 퀴즈 옵션 버튼 스타일 */
+.quiz-option {
+  background:pink;
+  color: #333;
 }
 
-#stopCameraBtn {
-    background-color: #e74c3c; /* 빨간색 계열 */
-}
-#stopCameraBtn:hover {
-    background-color: #c0392b;
+/* 정답 / 오답 상태 */
+.quiz-option.correct {
+  background: #8ce99a !important;
+  color: #fff;
 }
 
-#switchCameraBtn { /* 새로 추가된 카메라 전환 버튼 스타일 */
-    background-color: #6c757d; /* 회색 계열 */
-    margin-bottom: 10px; /* 하단 여백 추가 (captureBtn과 간격) */
+.quiz-option.wrong {
+  background: #ff6b6b !important;
+  color: #fff;
+}
+
+/* 결과 박스 */
+.result-box {
+  background-color: #e6faff;
+  border: 1px solid #b2ecf5;
+  padding: 1rem;
+  border-radius: 12px;
+  margin: 1.5rem auto;
+  font-weight: bold;
+  font-size: 1.1rem;
+  max-width: 400px;
+}
+
+/* 카메라 프리뷰 */
+#cameraPreview {
+  width: 100%;
+  max-width: 400px;
+  margin: 1rem auto;
+  border-radius: 12px;
+  background: #000;
+}
+
+/* 하단 아이콘 */
+.icon-row {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 2rem;
+  font-size: 1.8rem;
+  padding: 0 1.5rem 2rem;
+}
+
+.icon {
+  padding: 0.5rem;
+}
+
+/* 퀴즈 이미지 정렬 */
+#quizImage {
+  display: block;
+  max-width: 100%;
+  max-height: 250px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  margin: 1rem auto;
+}
+
+/* style.css 파일의 버튼 관련 섹션에 추가 */
+
+/* 카메라 전환 버튼 스타일 */
+#switchCameraBtn {
+  background-color: #6c757d; /* 회색 계열 */
+  color: white;
 }
 #switchCameraBtn:hover {
-    background-color: #5a6268;
+  background-color: #5a6268;
 }
 
-/* --- 카메라 미리보기 컨테이너 및 비디오 스타일 --- */
-#cameraPreviewContainer {
-    display: none; /* 초기에는 JS에 의해 숨겨짐 */
-    margin-top: 15px;
-    /* 내부 요소를 중앙 정렬하기 위해 flexbox 사용 */
-    display: flex;
-    flex-direction: column; /* 자식 요소들을 수직으로 배치 */
-    align-items: center; /* 수평 중앙 정렬 (교차축) */
-    justify-content: center; /* 수직 중앙 정렬 (주축) */
-}
-
-#cameraPreview {
-    display: block; /* JS로 보이게 할 때를 대비 */
-    width: 100%;
-    max-width: 400px; /* 너무 커지지 않도록 최대 너비 제한 */
-    margin: 15px auto 10px auto; /* 위쪽 마진, 아래쪽은 버튼과 간격 */
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #000;
-}
-
-#captureCanvas { /* 캔버스는 화면에 보이지 않게 숨김 */
-    display: none;
-}
-
-/* --- 미리보기 이미지 스타일 (JS에서 동적으로 생성되는 <img>) --- */
-#uploadedImagePreview {
-    display: none; /* 초기에는 숨김 */
-    max-width: 100%;
-    max-height: 300px;
-    object-fit: contain; /* 비율 유지하며 컨테이너에 맞춤 */
-    margin-top: 20px; /* 위 여백 */
-    border: 1px solid #eee;
-    border-radius: 8px;
-}
-
-/* --- 판별 결과 메시지 스타일 --- */
-.prediction-message {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 8px;
-    font-size: 1.3em;
-    font-weight: bold;
-    text-align: center; /* 결과 텍스트는 중앙 정렬이 더 좋을 수 있음 */
-    min-height: 2em; /* 내용이 없어도 최소 높이 유지 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    word-break: keep-all; /* 단어가 잘리지 않도록 (한국어에 유리) */
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* 부드러운 스타일 변화 */
-}
-
-/* 메시지 유형별 스타일 */
-.prediction-message.info {
-    color: #007bff; /* 파란색 계열 */
-    background-color: #e0f2ff;
-    border: 1px solid #b3e0ff;
-}
-
-.prediction-message.loading {
-    color: #555;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-}
-
-.prediction-message.success-animal {
-    color: #28a745; /* 녹색 */
-    background-color: #e6ffed;
-    border: 1px solid #a8e6b9;
-}
-
-.prediction-message.warning {
-    color: #ffc107; /* 주황색 */
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-}
-
-.prediction-message.error {
-    color: #dc3545; /* 빨간색 */
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-}
-
-/* --- 미디어 쿼리 (데스크탑/태블릿용) --- */
-@media (min-width: 768px) {
-    .container {
-        padding: 30px;
-    }
-
-    h1 {
-        font-size: 2.5em;
-    }
-}
-
-/* public/style.css 에 추가 */
-
-/* 기존 모든 버튼 스타일 아래 또는 별도 섹션에 추가 */
-.secondary-button { /* 다음 문제 등 보조 버튼 스타일 */
-    background-color: #6c757d; /* 회색 계열 */
-}
-.secondary-button:hover {
-    background-color: #5a6268;
-}
-/* public/style.css 파일 - #quizImage 스타일에 추가 */
-
-#quizImage {
-    display: block; /* <--- 이 줄 추가 */
-    margin-left: auto; /* <--- 이 줄 추가 */
-    margin-right: auto; /* <--- 이 줄 추가 */
-    /* ... 기존 스타일 유지 (max-width, max-height, border, border-radius, margin-bottom) ... */
-}
-
-/* public/style.css 에 추가 */
-
-#animalDetailedInfo ul {
-    list-style-type: none; /* 목록 앞의 점(불릿) 제거 */
-    padding-left: 0;       /* 왼쪽 기본 패딩 제거 (선택 사항, 필요에 따라 조절) */
-}
-
-#animalDetailedInfo ul li {
-    margin-bottom: 5px; /* 각 항목 간의 약간의 아래쪽 여백 (선택 사항) */
-}
-
-/* public/style.css 에 추가 */
-
-/* --- 카메라 전체 화면 모드 스타일 --- */
-#cameraPreviewContainer.fullscreen-mode {
-    position: fixed; /* 화면 전체를 덮도록 고정 */
-    top: 0;
-    left: 0;
-    width: 100vw; /* 뷰포트 너비 전체 */
-    height: 100vh; /* 뷰포트 높이 전체 */
-    background-color: black; /* 배경은 검은색 */
-    z-index: 1000; /* 다른 요소들 위에 표시 */
-    display: flex; /* 내부 비디오 중앙 정렬을 위해 */
-    justify-content: center;
-    align-items: center;
-    /* 기존 패딩이나 마진은 제거 */
-    padding: 0;
-    margin: 0;
-    border-radius: 0; /* 모서리 둥글림 제거 */
-    box-shadow: none; /* 그림자 제거 */
-}
-
-#cameraPreviewContainer.fullscreen-mode video#cameraPreview {
-    width: 100%; /* 컨테이너 너비에 맞춤 */
-    height: 100%; /* 컨테이너 높이에 맞춤 */
-    max-width: none; /* 최대 너비 제한 해제 */
-    max-height: none; /* 최대 높이 제한 해제 */
-    object-fit: contain; /* 비율 유지하며 꽉 채우거나, 'cover'로 완전히 덮기 */
-    border: none; /* 테두리 제거 */
-    border-radius: 0;
-}
-
-/* 전체 화면 모드일 때 다른 버튼들은 숨기거나, 종료 버튼만 보이도록 조정 가능 */
-#cameraPreviewContainer.fullscreen-mode #captureBtn,
-#cameraPreviewContainer.fullscreen-mode #switchCameraBtn {
-    /* display: none; */ /* 필요하다면 숨김 */
-    position: absolute; /* 화면 위에 버튼 배치 */
-    bottom: 20px;
-    z-index: 1001;
-    /* 스타일 조정 */
-}
-
-#cameraPreviewContainer.fullscreen-mode #captureBtn {
-    left: 20px;
-}
-#cameraPreviewContainer.fullscreen-mode #switchCameraBtn {
-    right: 20px;
-}
-
-/* 전체 화면 종료 버튼 (카메라 끄기 버튼 재활용 또는 새 버튼) */
-#cameraPreviewContainer.fullscreen-mode #stopCameraBtn {
-    position: absolute;
-    top: 20px;
-    right: 20px; /* 오른쪽 상단 */
-    z-index: 1001;
-    /* 스타일 조정 */
-    background-color: rgba(231, 76, 60, 0.8); /* 반투명 빨강 */
-}
-
-/* public/style.css 에 추가 */
-
-/* --- 카메라 섹션 내 특정 버튼 스타일 --- */
-#fullscreenBtn { /* 새로 추가된 전체 화면 버튼 스타일 */
-    background-color: #17a2b8; /* 청록색 계열 */
-}
-#fullscreenBtn:hover {
-    background-color: #138496;
+/* 퀴즈 옵션 버튼 기본 스타일 (기존 .quiz-option에서 일부 수정) */
+.quiz-option {
+  background: #ffc0cb; /* 분홍색을 명확히 지정 */
+  color: #333;
 }

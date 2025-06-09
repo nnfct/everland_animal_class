@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동물 판별 AI 웹앱 - 퀴즈쇼</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+
+        <h1>동물 퀴즈쇼!</h1>
+
+        <div id="quizSection">
+            <h2>이 동물은 무엇일까요?</h2>
+            <img id="quizImage" src="#" alt="퀴즈 이미지" style="max-width: 100%; max-height: 250px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 15px; display: none;">
+            
+            <!-- **여기 input 태그와 submitQuizAnswerBtn이 제거됩니다.** -->
+            
+            <div id="optionsContainer" style="margin-top: 15px;">
+                <!-- 객관식 선택지 버튼들이 JavaScript에 의해 여기에 동적으로 추가됩니다. -->
+            </div>
+
+            <!-- "정답 제출" 버튼이 사라지고 "다음 문제" 버튼만 남습니다. -->
+            <button type="button" id="nextQuizBtn" class="primary-button" style="margin-top: 15px;">다음 문제</button>
+            
+            <div id="quizResult" style="margin-top: 15px; font-weight: bold;"></div>
+            <!-- quizScoreDiv와 restartQuizBtn은 JS에서 동적으로 삽입됩니다. -->
+        </div>
+
+        <hr>
+
+        <div id="backToMainSection">
+            <button type="button" onclick="location.href='index.html'">메인 페이지로 돌아가기</button>
+        </div>
+
+    </div>
+
+    <script src="js/quiz.js"></script>
+</body>
+</html>
