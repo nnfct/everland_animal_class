@@ -214,7 +214,7 @@ body {
   width: 100%; /* 컨테이너 너비에 꽉 채움 */
   max-width: 400px; /* 이미지가 너무 커지는 것을 방지 */
   height: 300px; /* 모든 이미지의 높이를 300px로 고정 */
-  object-fit: cover; /* 이미지 비율을 유지하면서, 지정된 크기에 맞게 잘라냄 */
+  object-fit: contain; /* 이미지 비율을 유지하면서, 지정된 크기에 맞게 잘라냄 */
   border-radius: 16px; /* 모서리를 둥글게 */
   margin: 1.5rem auto; /* 위아래 여백 및 자동 중앙 정렬 */
   display: block; /* 블록 요소로 만들어 margin: auto 적용 */

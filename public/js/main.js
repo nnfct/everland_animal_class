@@ -173,7 +173,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (isTouchDevice) {
                 requestAnimationFrame(() => {
-                    cameraPreviewContainer.scrollIntoView({block: 'start' });
+                    const rect = cameraPreviewContainer.getBoundingClientRect();
+                    const absoluteTop = rect.top + window.scrollY;
+                    const offset = 60; // 원하는 오프셋 값
+                    window.scrollTo({
+                        top: absoluteTop - offset,
+                        behavior: 'auto'
+                    });
+                    
                 });
             }
         } catch (err) {
@@ -196,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     startCameraBtn.addEventListener('click', () => {
-        startCamera(hasMultipleCameras ? 'environment' : 'user');
+        startCamera('environment');
     });
 
     stopCameraBtn.addEventListener('click', stopCameraStream);
