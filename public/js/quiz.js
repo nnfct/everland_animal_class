@@ -175,8 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { image: 'quiz_images/n7.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n8.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n9.jpg', answer: '벌거숭이두더지쥐' },
-        { image: 'quiz_images/n10.jpg', answer: '벌거숭이두더지쥐' 
-        },
+        { image: 'quiz_images/n10.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n11.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n12.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n13.jpg', answer: '벌거숭이두더지쥐' },
@@ -186,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { image: 'quiz_images/n16.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n17.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n18.jpg', answer: '벌거숭이두더지쥐' },
-        { image: 'quiz_images/n19.jpg', answer: '벌거숭이두더지쥐   ' },
+        { image: 'quiz_images/n19.jpg', answer: '벌거숭이두더지쥐' },
         
         { image: 'quiz_images/n20.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n21.jpg', answer: '벌거숭이두더지쥐' },
@@ -199,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { image: 'quiz_images/n28.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n29.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n30.jpg', answer: '벌거숭이두더지쥐' },
-        { image: 'quiz_images/n31.jpg', answer: '벌거숭이두더지쥐   ' },
+        { image: 'quiz_images/n31.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n32.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n33.jpg', answer: '벌거숭이두더지쥐' },
         { image: 'quiz_images/n34.jpg', answer: '벌거숭이두더지쥐' },
@@ -531,6 +530,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextQuizBtn = document.getElementById('nextQuizBtn');
     const quizResultDiv = document.getElementById('quizResult');
     const quizSection = document.getElementById('quizSection');
+    const restartBtn = document.createElement('button');
+    restartBtn.id = 'restartBtn'
+    restartBtn.className = 'button quiz';
+    restartBtn.textContent = '퀴즈 시작하기';
+    restartBtn.style.display = 'none';
+    restartBtn.onclick = () => startQuiz(); // 새로고침 대신 퀴즈 재시작
+    quizSection.appendChild(restartBtn);
+
 
     const TOTAL_QUESTIONS = 5;
     let quizPool = [];
@@ -564,6 +571,14 @@ document.addEventListener('DOMContentLoaded', () => {
             nextQuizBtn.style.display = 'none';
             return;
         }
+
+        restartBtn.style.display = 'none';
+
+        nextQuizBtn.style.display = 'block';
+        scoreDisplay.style.display = 'block';
+        quizResultDiv.innerHTML = '';
+
+
         currentQuestionIndex = 0;
         score = 0;
         quizPool = shuffleArray([...quizData]).slice(0, TOTAL_QUESTIONS);
@@ -642,11 +657,12 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreDisplay.style.display = 'none';
         quizResultDiv.innerHTML = `퀴즈 종료!<br>최종 점수는 <strong>${score} / ${TOTAL_QUESTIONS}</strong> 입니다!`;
 
-        const restartBtn = document.createElement('button');
-        restartBtn.className = 'button quiz';
-        restartBtn.textContent = '퀴즈 다시하기';
-        restartBtn.onclick = () => startQuiz(); // 새로고침 대신 퀴즈 재시작
-        quizResultDiv.parentNode.insertBefore(restartBtn, quizResultDiv.nextSibling);
+        restartBtn.style.display = 'block';
+        // const restartBtn = document.createElement('button');
+        //restartBtn.className = 'button quiz';
+        //restartBtn.textContent = '퀴즈 다시하기';
+        //restartBtn.onclick = () => startQuiz(); // 새로고침 대신 퀴즈 재시작
+        //quizResultDiv.parentNode.insertBefore(restartBtn, quizResultDiv.nextSibling);
     }
 
     // 다음 문제 버튼 이벤트

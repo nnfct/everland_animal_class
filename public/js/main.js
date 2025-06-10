@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     
-    // main.js 파일에서 이 함수 전체를 교체하세요.
 
 
     
@@ -171,18 +170,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             cameraPreviewContainer.style.display = 'block'; // 카메라 보이기
             currentFacingMode = facingMode;
 
-            if (isTouchDevice) {
+            setTimeout(() => {
                 requestAnimationFrame(() => {
+                    const scrollableElement = document.querySelector('.container');
                     const rect = cameraPreviewContainer.getBoundingClientRect();
-                    const absoluteTop = rect.top + window.scrollY;
-                    const offset = 60; // 원하는 오프셋 값
-                    window.scrollTo({
+
+                    const scrollY = scrollableElement.scrollTop
+                    const absoluteTop = rect.top + scrollY;
+                    const offset = 120  // 원하는 오프셋 값
+                     scrollableElement.scrollTo({
                         top: absoluteTop - offset,
-                        behavior: 'auto'
+                behavior: 'auto'
                     });
-                    
-                });
-            }
+                }, 50);
+            });
         } catch (err) {
             alert('카메라를 시작할 수 없습니다: ' + err.message);
             resetToMainMenu(); // 실패 시 메인으로 복구
