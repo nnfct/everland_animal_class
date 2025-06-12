@@ -1,5 +1,26 @@
 // public/js/main.js (최종 수정본)
 
+// ↓↓↓↓↓↓ 여기에 첫 번째 코드 블록을 붙여넣으세요! ↓↓↓↓↓↓
+// --- 팝업 관련 요소 및 함수 ---
+const privacyPopup = document.getElementById('privacy-popup-overlay');
+const agreePrivacyBtn = document.getElementById('agree-privacy-btn');
+let actionAfterConsent = null; // 동의 후 실행할 함수를 저장할 변수
+
+/**
+ * 사용자가 개인정보 수집에 동의했는지 확인하고,
+ * 동의했다면 액션을 바로 실행, 안했다면 동의 팝업을 요청하는 함수
+ * @param {Function} action - 사용자가 동의했을 때 실행될 함수
+ */
+function handlePrivacyConsent(action) {
+  if (localStorage.getItem('privacyConsent') === 'true') {
+    action();
+  } else {
+    actionAfterConsent = action;
+    privacyPopup.classList.remove('hidden');
+  }
+}
+// ↑↑↑↑↑↑ 여기까지가 첫 번째 코드 블록입니다 ↑↑↑↑↑↑
+
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("DOM 로드 완료, main.js 초기화 시작");
       
@@ -198,10 +219,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- 이벤트 리스너 ---
 
+    // ... 기존 코드 ...
+    // --- 이벤트 리스너 ---
+
+    agreePrivacyBtn.addEventListener('click', () => {
+      localStorage.setItem('privacyConsent', 'true');
+      privacyPopup.classList.add('hidden');
+      if (typeof actionAfterConsent === 'function') {
+        actionAfterConsent();
+        actionAfterConsent = null;
+      }
+    });
+
+    const declinePrivacyBtn = document.getElementById('decline-privacy-btn');
+    declinePrivacyBtn.addEventListener('click', () => {
+      privacyPopup.classList.add('hidden');
+      actionAfterConsent = null;
+      alert('개인정보 수집에 동의하지 않으셨습니다. 기능을 이용할 수 없습니다.');
+    });
+    // ↑↑↑↑↑↑ 여기까지가 두 번째 코드 블록입니다 ↑↑↑↑↑↑
+
+    // ... 이하 기존 코드 ...
+
     imageFile.addEventListener('change', (event) => {
         const file = event.target.files[0];
-        handleFile(file);
-    });
+        if (file) {
+            handlePrivacyConsent(() => {
+                console.log("사용자가 개인정보 수집에 동의했습니다.");
+                handleFile(file);
+            });
+        }
+        }
+        
+    )
 
     startCameraBtn.addEventListener('click', () => {
         startCamera('environment');
